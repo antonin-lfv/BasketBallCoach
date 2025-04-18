@@ -1,6 +1,6 @@
 import streamlit as st
 from manim import *
-from helper_V3 import *
+from helper import *
 from pathlib import Path
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg

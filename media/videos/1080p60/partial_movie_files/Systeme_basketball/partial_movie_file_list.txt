@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:/Users/antoninlefevre/Downloads/langages_informatiques/Python/Projets/BasketBallCoach/media/videos/1080p60/partial_movie_files/Systeme_basketball/517782116_59456458_1276284204.mp4'
+file 'file:/Users/antoninlefevre/Downloads/langages_informatiques/Python/Projets/BasketBallCoach/media/videos/1080p60/partial_movie_files/Systeme_basketball/1227781776_1121617232_3990312473.mp4'
+file 'file:/Users/antoninlefevre/Downloads/langages_informatiques/Python/Projets/BasketBallCoach/media/videos/1080p60/partial_movie_files/Systeme_basketball/1227781776_2968904986_693496790.mp4'
+file 'file:/Users/antoninlefevre/Downloads/langages_informatiques/Python/Projets/BasketBallCoach/media/videos/1080p60/partial_movie_files/Systeme_basketball/1227781776_1104788641_1493461374.mp4'
+file 'file:/Users/antoninlefevre/Downloads/langages_informatiques/Python/Projets/BasketBallCoach/media/videos/1080p60/partial_movie_files/Systeme_basketball/1227781776_1121617232_468411044.mp4'
