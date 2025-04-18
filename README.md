@@ -2,7 +2,7 @@
 
 Une application Streamlit pour créer des **séquences d’animation** de systèmes de jeu de basketball, avec génération vidéo via Manim.
 
----
+
 
 ## 📋 Présentation
 
@@ -13,6 +13,19 @@ Cette appli permet de :
 - **Générer** une vidéo animée du système de jeu avec Manim.
 - **Exporter/importer** la configuration pour la réutilisation ultérieure.
 - **Obtenir** une description en langage naturel de la séquence.
+
+<br>
+
+## 👁️ Aperçu
+
+![alt text](<images/Capture d’écran 2025-04-18 à 18.30.00.png>)
+![alt text](<images/Capture d’écran 2025-04-18 à 18.30.06.png>)
+![alt text](<images/Capture d’écran 2025-04-18 à 18.30.14.png>)
+![alt text](<images/Capture d’écran 2025-04-18 à 18.30.29.png>)
+![alt text](<images/Capture d’écran 2025-04-18 à 18.35.29.png>)
+![alt text](<images/Capture d’écran 2025-04-18 à 18.35.52.png>)
+![alt text](<images/Capture d’écran 2025-04-18 à 18.35.59.png>)
+
 
 ## 🚀 Lancer l'application
 
