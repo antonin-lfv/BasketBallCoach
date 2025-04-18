@@ -22,5 +22,5 @@ uv run streamlit run main.py
 
 Pour installer `uv`, voir la doc [ICI](https://docs.astral.sh/uv/).
 
-Si problème avec Latex, se référer à la documentation pour l'installer [ICI](https://docs.manim.community/en/stable/installation/uv.html#step-2-optional-installing-latex).
+Si problème avec Latex lors de la génération de l'animation, se référer à la documentation pour l'installer [ICI](https://docs.manim.community/en/stable/installation/uv.html#step-2-optional-installing-latex).
 
