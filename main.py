@@ -1050,7 +1050,7 @@ with end_main_col:
     st.download_button(
         label="Télécharger le fichier en format txt",
         data=json_file,
-        file_name="animation.txt",
+        file_name=f"{st.session_state["scene_name"]}.txt",
         icon="📥",
     )
     
