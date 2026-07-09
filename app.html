@@ -347,8 +347,10 @@
 
 <header>
   <button class="btn" id="sidebarBtn" title="Afficher / masquer le panneau">◧</button>
-  <span class="logo">🏀</span>
-  <span class="brand">BasketballCoach</span>
+  <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit" title="Retour à la page d'accueil">
+    <span class="logo">🏀</span>
+    <span class="brand">BasketballCoach</span>
+  </a>
   <input id="titleInput" value="Nouveau système" spellcheck="false">
   <span class="spacer"></span>
   <button class="btn" id="newBtn">Nouveau</button>
@@ -1108,8 +1110,9 @@ function totalDuration() {
 function sampleAt(t) {
   const ph = state.phases;
   const out = { pos: {}, ball: null, ballScale: 1, label: ph[0].name, phaseIdx: 0, screens: [] };
+  // écrans dessinés aux positions FINALES de la phase (pas d'écran qui suit les joueurs)
   const screensOf = (phase, alpha) => visibleScreens(phase).map((sc) => ({
-    sPos: out.pos[sc.s], dPos: out.pos[sc.d], alpha,
+    sPos: phase.pos[sc.s], dPos: phase.pos[sc.d], alpha,
   }));
 
   if (ph.length === 1 || t <= START_HOLD) {
@@ -1135,7 +1138,7 @@ function sampleAt(t) {
       out.ballScale = out._bs || 1;
       out.label = B.name;
       out.phaseIdx = i;
-      out.screens = screensOf(B, Math.min(1, e * 2));   // fondu à l'approche
+      out.screens = screensOf(B, clamp((e - 0.65) / 0.3, 0, 1));   // apparaît en fin de déplacement
       return out;
     }
     acc += dur;
@@ -1193,6 +1196,24 @@ function sampleAt(t) {
 let dragging = null;   // { id: 'a1'|'ball'|'via', ... }
 let dragBallPos = null;
 let exportMode = false;   // masque les poignées d'édition sur les rendus exportés
+let cleanExport = false;  // masque aussi le titre et le libellé de phase (planche)
+
+// Redimensionne le canvas pour un rendu recadré sur le terrain seul (haute résolution).
+// Retourne une fonction de restauration.
+function beginExportCanvas() {
+  const prevM = COURT.M;
+  COURT.M = 0.8;   // juste de quoi voir un joueur en touche
+  const half = state.courtMode === "half";
+  const scale = half ? 95 : 85;   // px par mètre
+  const cw = (half ? COURT.H : COURT.W) + 2 * COURT.M;
+  const ch = (half ? COURT.HALF : COURT.H) + 2 * COURT.M;
+  cv.width = Math.round(cw * scale);
+  cv.height = Math.round(ch * scale);
+  return () => {
+    COURT.M = prevM;
+    resize();
+  };
+}
 
 function render() {
   computeView();
@@ -1242,10 +1263,10 @@ function render() {
     if (dragging && dragging.id === "ball" && dragBallPos) drawBall(dragBallPos, 0.9, 1.15);
     else drawBall(staticBallPos(phase));
 
-    drawOverlayText(phase.name, false);
+    if (!cleanExport) drawOverlayText(phase.name, false);
   }
 
-  drawTitle();
+  if (!cleanExport) drawTitle();
 }
 
 function drawOverlayText(label, isPlayback) {
@@ -1739,6 +1760,7 @@ $("#imgBtn").addEventListener("click", async () => {
   hideScreenPopup();
   const base = slug(state.title);
   exportMode = true;
+  const endExport = beginExportCanvas();
   for (let i = 0; i < state.phases.length; i++) {
     sel = i;
     render();   // vue édition : positions + flèches + écrans de la phase i
@@ -1747,6 +1769,7 @@ $("#imgBtn").addEventListener("click", async () => {
     await new Promise((r) => setTimeout(r, 350));
   }
   exportMode = false;
+  endExport();
   sel = prevSel;
   renderPhaseListSelectionOnly();
   toast(state.phases.length + " image(s) exportée(s) — une par phase.");
@@ -1761,16 +1784,21 @@ $("#boardBtn").addEventListener("click", () => {
   const prevSel = sel;
   const cells = [];
   exportMode = true;
+  cleanExport = true;
+  const endExport = beginExportCanvas();
   for (let i = 0; i < state.phases.length; i++) {
     sel = i;
     render();
     cells.push({
       url: cv.toDataURL("image/png"),
       name: state.phases[i].name,
-      ball: state.phases[i].ball === "shot" ? "tir au panier" : "ballon : joueur " + state.phases[i].ball[1],
+      ball: state.phases[i].ball === "shot" ? "tir au panier"
+        : "ballon : " + (state.phases[i].ball[0] === "d" ? "défenseur " : "joueur ") + state.phases[i].ball[1],
     });
   }
   exportMode = false;
+  cleanExport = false;
+  endExport();
   sel = prevSel;
   render();
   const w = window.open("", "_blank");
@@ -1782,7 +1810,7 @@ $("#boardBtn").addEventListener("click", () => {
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #111; }
   h1 { font-size: 20px; margin: 0 0 4px; }
   .sub { color: #666; font-size: 12px; margin-bottom: 16px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid { display: grid; grid-template-columns: ${state.courtMode === "half" ? "1fr 1fr" : "1fr"}; gap: 14px; }
   figure { margin: 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
   img { width: 100%; display: block; }
   figcaption { padding: 6px 10px; font-size: 12px; color: #444; border-top: 1px solid #eee; }

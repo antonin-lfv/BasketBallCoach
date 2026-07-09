@@ -341,7 +341,7 @@
         <span class="dot" style="background:#ff5f57"></span>
         <span class="dot" style="background:#febc2e"></span>
         <span class="dot" style="background:#28c840"></span>
-        <span class="title">BasketballCoach — Corne</span>
+        <span class="title">BasketballCoach — Système 1</span>
       </div>
       <canvas id="heroCanvas" width="640" height="520"></canvas>
     </div>
@@ -545,20 +545,128 @@ function runLoop(cv, K, colors, DUR, HOOP) {
 
 const HOOP = { x: 7.5, y: 1.575 };
 
-/* Hero : pick and roll à 5 (3 attaquants + 2 défenseurs) */
-runLoop(
-  document.getElementById("heroCanvas"),
-  [
-    { p: [{x:7.5,y:9.4},{x:12.6,y:7.0},{x:2.4,y:7.0},{x:5.6,y:4.9},{x:8.4,y:10.2}], ball: 0 },
-    { p: [{x:8.4,y:8.6},{x:13.2,y:8.4},{x:2.2,y:8.2},{x:8.7,y:7.6},{x:9.2,y:9.4}], ball: 0 },
-    { p: [{x:6.0,y:5.2},{x:13.2,y:8.4},{x:2.2,y:8.2},{x:9.6,y:3.8},{x:7.0,y:6.2}], ball: 0 },
-    { p: [{x:6.0,y:5.2},{x:13.2,y:8.4},{x:2.2,y:8.2},{x:9.6,y:3.8},{x:7.2,y:4.6}], ball: 3 },
-    { p: [{x:6.4,y:6.2},{x:13.4,y:9.0},{x:2.0,y:8.8},{x:8.4,y:2.4},{x:8.6,y:3.4}], ball: "shot" },
-    { p: [{x:7.5,y:9.4},{x:12.6,y:7.0},{x:2.4,y:7.0},{x:5.6,y:4.9},{x:8.4,y:10.2}], ball: 0 },
-  ],
-  [{c:C.green,n:1},{c:C.green,n:2},{c:C.green,n:3},{c:C.green,n:5},{c:C.red,n:1}],
-  1.8, HOOP
-);
+/* ===== Hero : un vrai système, exporté depuis l'application =====
+   Rejoué avec la même logique que l'app : trajectoires courbes
+   (Catmull-Rom), écrans en T, dribble, passes et tir. */
+const SYSTEM = {"app":"basketballcoach-web","version":1,"title":"Nouveau syst\u00e8me","courtMode":"half","defenders":5,"phases":[{"name":"Phase 1","duration":1.5,"ball":"a1","pos":{"a1":{"x":8.6,"y":7.5},"a2":{"x":7,"y":2.6},"a3":{"x":7,"y":12.4},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":7.1,"y":7.5},"d2":{"x":5.886846035873292,"y":3.6054293869531553},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[],"via":{}},{"name":"Phase 2","duration":1.5,"ball":"a3","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":7,"y":2.6},"a3":{"x":7,"y":12.4},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":7.1,"y":7.5},"d2":{"x":5.886846035873292,"y":3.6054293869531553},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[{"s":"a1","d":"d3"}],"via":{}},{"name":"Phase 3","duration":1.5,"ball":"a3","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":7,"y":2.6},"a3":{"x":5.702381303648068,"y":8.790578728540773},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":4.7939552038626605,"y":8.198157859442059},"d2":{"x":5.886846035873292,"y":3.6054293869531553},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[],"via":{"a3":[{"x":7.22965933476395,"y":10.303169259656652}],"d1":[{"x":5.78939981223176,"y":7.634438707081546}]}},{"name":"Phase 4","duration":1.5,"ball":"a3","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":8.817285407725322,"y":7.454513814377682},"a3":{"x":5.702381303648068,"y":8.790578728540773},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":4.7939552038626605,"y":8.198157859442059},"d2":{"x":7.075881711838957,"y":6.194420132661309},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[],"via":{"a2":[{"x":8.40511534334764,"y":4.8982986856223185}]}},{"name":"Phase 5","duration":1.5,"ball":"a2","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":8.817285407725322,"y":7.454513814377682},"a3":{"x":5.702381303648068,"y":8.790578728540773},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":4.7939552038626605,"y":8.198157859442059},"d2":{"x":7.075881711838957,"y":6.194420132661309},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[],"via":{}},{"name":"Phase 6","duration":1.5,"ball":"a2","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":8.817285407725322,"y":7.454513814377682},"a3":{"x":6.6019527896995704,"y":5.366058208154508},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":4.7939552038626605,"y":8.198157859442059},"d2":{"x":7.075881711838957,"y":6.194420132661309},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[{"s":"a3","d":"d2"}],"via":{"a3":[{"x":5.9112909066523605,"y":6.9354660675965665}]}},{"name":"Phase 7","duration":1.5,"ball":"a2","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":5.088743293991416,"y":4.586596700643776},"a3":{"x":6.6019527896995704,"y":5.366058208154508},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":4.7939552038626605,"y":8.198157859442059},"d2":{"x":7.075881711838957,"y":6.194420132661309},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[],"via":{"a2":[{"x":6.972188841201717,"y":4.672278701716738}]}},{"name":"Phase 8","duration":1.5,"ball":"shot","pos":{"a1":{"x":6.488470359442059,"y":10.785247451716739},"a2":{"x":5.088743293991416,"y":4.586596700643776},"a3":{"x":6.6019527896995704,"y":5.366058208154508},"a4":{"x":2.6,"y":5.1},"a5":{"x":2.6,"y":9.9},"d1":{"x":4.7939552038626605,"y":8.198157859442059},"d2":{"x":7.075881711838957,"y":6.194420132661309},"d3":{"x":5.886846035873292,"y":11.394570613046845},"d4":{"x":2.0108557541134533,"y":6.479459697685573},"d5":{"x":2.0108557541134533,"y":8.520540302314426}},"screens":[],"via":{}}],"situation":"defaut"};
+
+(function heroSystem() {
+  const cv = document.getElementById("heroCanvas");
+  const court = makeCourt(cv);
+  const ctx = court.ctx;
+  const s = Math.min(cv.width / 16.4, cv.height / 15.4);
+  const ox = (cv.width - 15 * s) / 2, oy = (cv.height - 14 * s) / 2;
+  const SP = (x, y) => [ox + x * s, oy + y * s];
+
+  // coordonnées app (x = distance ligne de fond, y = largeur) -> vue (panier en haut)
+  const V = (p) => ({ x: 15 - p.y, y: p.x });
+  const ATT = ["a1", "a2", "a3", "a4", "a5"];
+  const DEF = ["d1", "d2", "d3", "d4", "d5"].slice(0, SYSTEM.defenders);
+  const IDS = [...ATT, ...DEF];
+  const HOOP_APP = { x: 1.575, y: 7.5 };
+  const ph = SYSTEM.phases;
+  const START_HOLD = 0.6, END_HOLD = 1.2;
+  let TOTAL = START_HOLD + END_HOLD;
+  for (let i = 1; i < ph.length; i++) TOTAL += ph[i].duration || 1.5;
+
+  const clamp01 = (v) => Math.min(1, Math.max(0, v));
+  function crPoint(pts, t) {
+    const n = pts.length - 1;
+    if (n <= 0) return { ...pts[0] };
+    const ft = clamp01(t) * n;
+    const i = Math.min(n - 1, Math.floor(ft));
+    const u = ft - i;
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n, i + 2)];
+    const cr = (a, b, c, d) =>
+      0.5 * (2 * b + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u * u + (-a + 3 * b - 3 * c + d) * u * u * u);
+    return { x: cr(p0.x, p1.x, p2.x, p3.x), y: cr(p0.y, p1.y, p2.y, p3.y) };
+  }
+  const pathPts = (A, B, id) => [A.pos[id], ...((B.via && B.via[id]) || []), B.pos[id]];
+  function posAlong(A, B, id, e) {
+    const pts = pathPts(A, B, id);
+    if (pts.length > 2) return crPoint(pts, e);
+    return { x: lerp(pts[0].x, pts[1].x, e), y: lerp(pts[0].y, pts[1].y, e) };
+  }
+  const moving = (A, B, id) =>
+    Math.hypot(A.pos[id].x - B.pos[id].x, A.pos[id].y - B.pos[id].y) > 0.8 ||
+    ((B.via && B.via[id]) || []).length > 0;
+
+  function drawScreenT(sAppPos, dAppPos, alpha) {
+    const sp = V(sAppPos), dp = V(dAppPos);
+    const dx = dp.x - sp.x, dy = dp.y - sp.y;
+    const n = Math.hypot(dx, dy) || 1;
+    const ux = dx / n, uy = dy / n;
+    const bar = { x: dp.x - ux * 0.75, y: dp.y - uy * 0.75 };
+    const HB = 0.65, TAIL = 0.6;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineCap = "round";
+    ctx.lineWidth = Math.max(3, s * 0.13);
+    ctx.beginPath();
+    ctx.moveTo(...SP(bar.x + uy * HB, bar.y - ux * HB));
+    ctx.lineTo(...SP(bar.x - uy * HB, bar.y + ux * HB));
+    ctx.moveTo(...SP(bar.x, bar.y));
+    ctx.lineTo(...SP(bar.x - ux * TAIL, bar.y - uy * TAIL));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function sample(t) {
+    const out = { pos: {}, screens: [], ball: null, scale: 1 };
+    const stat = (P) => {
+      IDS.forEach((id) => (out.pos[id] = P.pos[id]));
+      out.screens = (P.screens || []).map((sc) => ({ s: P.pos[sc.s], d: P.pos[sc.d], a: 1 }));
+      out.ball = P.ball === "shot" ? HOOP_APP : P.pos[P.ball];
+    };
+    if (t <= START_HOLD) { stat(ph[0]); return out; }
+    let acc = START_HOLD;
+    for (let i = 1; i < ph.length; i++) {
+      const dur = ph[i].duration || 1.5;
+      if (t < acc + dur || i === ph.length - 1) {
+        const local = clamp01((t - acc) / dur);
+        const e = ease(local);
+        const A = ph[i - 1], B = ph[i];
+        IDS.forEach((id) => (out.pos[id] = posAlong(A, B, id, e)));
+        out.screens = (B.screens || []).map((sc) => ({
+          s: B.pos[sc.s], d: B.pos[sc.d], a: clamp01((e - 0.65) / 0.3),
+        }));
+        if (A.ball !== "shot" && B.ball === "shot") {
+          out.ball = { x: lerp(out.pos[A.ball].x, HOOP_APP.x, e), y: lerp(out.pos[A.ball].y, HOOP_APP.y, e) };
+          out.scale = 1 - 0.3 * Math.sin(Math.PI * e);
+        } else if (A.ball === "shot") {
+          out.ball = B.ball === "shot" ? HOOP_APP
+            : { x: lerp(HOOP_APP.x, out.pos[B.ball].x, e), y: lerp(HOOP_APP.y, out.pos[B.ball].y, e) };
+        } else if (A.ball !== B.ball) {
+          out.ball = { x: lerp(out.pos[A.ball].x, out.pos[B.ball].x, e), y: lerp(out.pos[A.ball].y, out.pos[B.ball].y, e) };
+        } else {
+          out.ball = out.pos[A.ball];
+          if (moving(A, B, A.ball)) out.scale = 0.7 + 0.3 * Math.abs(Math.sin(Math.PI * 4 * local));
+        }
+        return out;
+      }
+      acc += dur;
+    }
+    stat(ph[ph.length - 1]);
+    return out;
+  }
+
+  let t0 = performance.now();
+  function frame(now) {
+    const t = (((now - t0) / 1000) % TOTAL + TOTAL) % TOTAL;
+    const S = sample(t);
+    court.draw();
+    IDS.forEach((id) => {
+      const v = V(S.pos[id]);
+      court.token(v.x, v.y, id[0] === "a" ? C.green : C.red, id[1]);
+    });
+    S.screens.forEach((sc) => { if (sc.a > 0) drawScreenT(sc.s, sc.d, sc.a); });
+    const bv = V(S.ball);
+    court.ball(bv.x, bv.y, S.scale);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
 
 /* Bande animation : passe et va */
 runLoop(
