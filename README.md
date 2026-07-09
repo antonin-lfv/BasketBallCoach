@@ -16,6 +16,8 @@ Le principe est celui des **phases** (keyframes) : chaque phase mémorise la pos
 - **Passe** : glisser le ballon sur un autre attaquant.
 - **Tir** : glisser le ballon sur le panier.
 - **Écran** : glisser un joueur sans ballon sur un défenseur, puis confirmer. L'écran est noté par un symbole en T orienté selon la position du poseur. Cliquer sur le T pour le retirer.
+- **Trajectoires courbes** : tirer sur le petit point au milieu d'une flèche pour la courber (spline Catmull-Rom). Chaque segment expose une nouvelle poignée pour affiner. Double-clic sur un point pour le retirer.
+- **Dribble** : pendant la lecture, le ballon rebondit (variation de taille) quand son porteur se déplace.
 - **Fantômes et flèches** : la vue d'édition montre la phase précédente en transparence, avec flèches de déplacement (pleines) et de passe/tir (pointillées).
 - **Lecture** : bouton ▶ ou Espace, vitesse réglable, timeline scrubbable.
 - **Terrain** : demi-terrain ou terrain complet (FIBA 28×15 m).
@@ -23,6 +25,7 @@ Le principe est celui des **phases** (keyframes) : chaque phase mémorise la pos
 - **Export JSON** : sauvegarde/rechargement d'un système.
 - **Export vidéo** : enregistre la lecture en WebM/MP4 via MediaRecorder.
 - **Export images** : un PNG par phase, avec flèches et écrans, pour impression ou partage.
+- **Planche imprimable / PDF** : toutes les phases en grille dans une page prête à imprimer (Cmd/Ctrl+P → enregistrer en PDF).
 - **Annuler** : Ctrl+Z / Cmd+Z. Sauvegarde automatique dans le navigateur (localStorage).
 
 ## Détails techniques
