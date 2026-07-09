@@ -348,6 +348,19 @@
         </div>
       </div>
       <div class="row">
+        <label class="inline">Situation</label>
+        <select id="situationSel" title="Position initiale (phase 1)">
+          <option value="">Position initiale…</option>
+          <option value="defaut">Attaque placée (défaut)</option>
+          <option value="cote_gauche">Côté gauche</option>
+          <option value="cote_droit">Côté droit</option>
+          <option value="fond_gauche">Fond gauche</option>
+          <option value="fond_droit">Fond droit</option>
+          <option value="lf_attaque">Lancer franc attaque</option>
+          <option value="lf_defense">Lancer franc défense</option>
+        </select>
+      </div>
+      <div class="row">
         <label class="inline">Défenseurs</label>
         <select id="defCount">
           <option value="0">0</option><option value="1">1</option><option value="2">2</option>
@@ -442,6 +455,99 @@ function defaultPositions() {
     p[DEF_IDS[i]] = { x: a.x + v.x / n * 1.5, y: a.y + v.y / n * 1.5 };
   });
   return p;
+}
+
+/* ---------- Situations initiales ---------- */
+// Coordonnées définies pour la variante "gauche" en vue demi-terrain
+// (y petit = gauche à l'écran). "Droit" = miroir. En terrain complet,
+// la vue est retournée : gauche et droite s'inversent, d'où le XOR.
+
+const SITUATION_LABELS = {
+  defaut: "Attaque placée", cote_gauche: "Côté gauche", cote_droit: "Côté droit",
+  fond_gauche: "Fond gauche", fond_droit: "Fond droit",
+  lf_attaque: "Lancer franc attaque", lf_defense: "Lancer franc défense",
+};
+
+function situationPositions(baseKey) {
+  const A = {}, D = {};
+  let ball = "a1";
+  // spots de rebond le long de la raquette (1er = près de la ligne de fond)
+  const spot = (n, side) => ({ x: 2.2 + (n - 1) * 1.4, y: side < 0 ? 4.6 : 10.4 });
+  switch (baseKey) {
+    case "cote_gauche":   // remise en touche, ligne de côté
+      Object.assign(A, {
+        a1: { x: 6.5, y: -0.5 },  a2: { x: 5.2, y: 2.8 },  a3: { x: 8.6, y: 4.8 },
+        a4: { x: 2.6, y: 4.8 },   a5: { x: 4.2, y: 9.6 },
+      });
+      break;
+    case "fond_gauche":   // remise en fond de terrain, alignement en boîte
+      Object.assign(A, {
+        a1: { x: -0.5, y: 5.3 },
+        a2: spot(1, -1), a3: spot(1, 1), a4: spot(3, -1), a5: spot(3, 1),
+      });
+      break;
+    case "lf_attaque":    // notre lancer franc : a1 tire
+      Object.assign(A, {
+        a1: { x: 5.8, y: 7.5 },
+        a4: spot(2, -1), a5: spot(2, 1),
+        a2: { x: 7.6, y: 3.6 }, a3: { x: 9.0, y: 9.2 },
+      });
+      Object.assign(D, {
+        d4: spot(1, -1), d5: spot(1, 1), d3: spot(3, -1), d2: spot(3, 1),
+        d1: { x: 7.0, y: 7.5 },
+      });
+      break;
+    case "lf_defense":    // lancer franc adverse : d1 tire, le ballon part au cercle
+      Object.assign(A, {
+        a4: spot(1, -1), a5: spot(1, 1), a3: spot(3, -1), a2: spot(3, 1),
+        a1: { x: 8.2, y: 7.5 },
+      });
+      Object.assign(D, {
+        d1: { x: 5.8, y: 7.5 }, d2: spot(2, -1), d3: spot(2, 1),
+        d4: { x: 7.4, y: 5.6 }, d5: { x: 7.4, y: 9.4 },
+      });
+      ball = "shot";
+      break;
+  }
+  return { A, D, ball };
+}
+
+function applySituation(key) {
+  if (!key) return;
+  pushUndo();
+  const ph = state.phases[0];
+  if (key === "defaut") {
+    ph.pos = defaultPositions();
+    ph.ball = "a1";
+  } else {
+    const baseKey = key.replace("_droit", "_gauche");
+    const { A, D, ball } = situationPositions(baseKey);
+    // miroir si variante "droit" XOR vue terrain complet (gauche/droite inversés)
+    const flip = key.endsWith("_droit") !== (state.courtMode === "full");
+    const put = (id, p) => {
+      ph.pos[id] = clampToCourt(flip ? { x: p.x, y: 15 - p.y } : { x: p.x, y: p.y });
+    };
+    Object.entries(A).forEach(([id, p]) => put(id, p));
+    if (Object.keys(D).length) {
+      Object.entries(D).forEach(([id, p]) => put(id, p));
+      if (state.defenders === 0) state.defenders = 5;   // le LF n'a de sens qu'avec des défenseurs
+    } else {
+      // marquage automatique des défenseurs visibles
+      for (let i = 0; i < 5; i++) {
+        const a = ph.pos[ATT_IDS[i]];
+        const hoop = nearestHoop(a);
+        const v = { x: hoop.x - a.x, y: hoop.y - a.y };
+        const n = Math.hypot(v.x, v.y) || 1;
+        ph.pos[DEF_IDS[i]] = clampToCourt({ x: a.x + v.x / n * 1.4, y: a.y + v.y / n * 1.4 });
+      }
+    }
+    ph.ball = ball;
+  }
+  ph.screens = [];
+  state.situation = key;
+  sel = 0;
+  syncUI(); save();
+  toast("Situation appliquée : " + SITUATION_LABELS[key]);
 }
 
 function makePhase(base, n) {
@@ -1445,6 +1551,7 @@ function movePhase(i, dir) {
 function syncUI() {
   $("#titleInput").value = state.title;
   $("#defCount").value = state.defenders;
+  $("#situationSel").value = state.situation || "";
   document.querySelectorAll("#courtSeg button").forEach((b) =>
     b.classList.toggle("active", b.dataset.mode === state.courtMode));
   renderPhaseList();
@@ -1467,6 +1574,8 @@ document.querySelectorAll("#courtSeg button").forEach((b) => {
     syncUI(); save();
   });
 });
+
+$("#situationSel").addEventListener("change", (e) => applySituation(e.target.value));
 
 $("#defCount").addEventListener("change", (e) => {
   pushUndo();

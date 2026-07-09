@@ -22,6 +22,7 @@ Le principe est celui des **phases** (keyframes) : chaque phase mémorise la pos
 - **Lecture** : bouton ▶ ou Espace, vitesse réglable, timeline scrubbable.
 - **Terrain** : demi-terrain ou terrain complet (FIBA 28×15 m).
 - **Défenseurs** : 0 à 5, avec placement automatique entre l'attaquant et le panier.
+- **Situations initiales** : sélecteur de mises en place pour la phase 1 (côté gauche/droit, fond gauche/droit, lancer franc attaque/défense). Gauche et droite sont automatiquement inversés en vue terrain complet.
 - **Export JSON** : sauvegarde/rechargement d'un système.
 - **Export vidéo** : enregistre la lecture en WebM/MP4 via MediaRecorder.
 - **Export images** : un PNG par phase, avec flèches et écrans, pour impression ou partage.
