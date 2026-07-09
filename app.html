@@ -77,8 +77,8 @@
 
   /* ===== Sidebar ===== */
   aside {
-    width: 300px;
-    min-width: 300px;
+    width: 340px;
+    min-width: 340px;
     background: var(--panel);
     border-right: 1px solid var(--border);
     display: flex;
@@ -314,11 +314,39 @@
   .modal-box h3 { font-size: 16px; margin-bottom: 8px; }
   .modal-box p { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 18px; }
   .modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* ===== Sidebar repliable ===== */
+  body.no-sidebar aside { display: none; }
+  #sidebarBtn { padding: 7px 10px; font-size: 16px; line-height: 1; }
+
+  /* ===== Tailles de police agrandies ===== */
+  .btn { font-size: 14.5px; }
+  .btn.small { font-size: 13px; }
+  #titleInput { font-size: 16px; }
+  header .brand { font-size: 16px; }
+  aside h2 { font-size: 12.5px; }
+  label.inline, select, input[type="number"] { font-size: 14.5px; }
+  .seg button { font-size: 14.5px; }
+  .phase-item input.pname { font-size: 15px; }
+  .phase-item .num { font-size: 12px; }
+  .phase-item .bottom { font-size: 13.5px; }
+  .icon-btn { font-size: 14.5px; }
+  .ball-tag { font-size: 12.5px; }
+  .scr-tag { font-size: 12.5px; }
+  .hint { font-size: 13.5px; }
+  #timeLabel { font-size: 13.5px; min-width: 96px; }
+  #menuList button { font-size: 14.5px; }
+  #toast { font-size: 14.5px; }
+  #screenPopup { font-size: 14.5px; }
+  .modal-box h3 { font-size: 18px; }
+  .modal-box p { font-size: 15px; }
+  #recBadge { font-size: 13px; }
 </style>
 </head>
 <body>
 
 <header>
+  <button class="btn" id="sidebarBtn" title="Afficher / masquer le panneau">◧</button>
   <span class="logo">🏀</span>
   <span class="brand">BasketballCoach</span>
   <input id="titleInput" value="Nouveau système" spellcheck="false">
@@ -1635,6 +1663,15 @@ function resetState() {
   syncUI(); save();
 }
 
+$("#sidebarBtn").addEventListener("click", () => {
+  document.body.classList.toggle("no-sidebar");
+  try {
+    localStorage.setItem("bballcoach_sidebar",
+      document.body.classList.contains("no-sidebar") ? "hidden" : "shown");
+  } catch (e) {}
+  resize();
+});
+
 $("#menuBtn").addEventListener("click", (e) => {
   e.stopPropagation();
   $("#menuList").classList.toggle("show");
@@ -1821,6 +1858,11 @@ window.addEventListener("keydown", (e) => {
         state = data;
         normalizePhases();
       }
+    }
+  } catch (e) {}
+  try {
+    if (localStorage.getItem("bballcoach_sidebar") === "hidden") {
+      document.body.classList.add("no-sidebar");
     }
   } catch (e) {}
   resize();
