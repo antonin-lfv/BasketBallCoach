@@ -6,7 +6,10 @@
 
 ## Lancer
 
-Ouvrir `index.html` dans un navigateur (double-clic suffit). Pour le partager : héberger le fichier n'importe où (GitHub Pages, Netlify, un simple serveur) ou l'envoyer tel quel.
+- `index.html` : la landing page de présentation.
+- `app.html` : l'application elle-même (double-clic suffit).
+
+Pour le partager : héberger les deux fichiers n'importe où (GitHub Pages, Netlify, un simple serveur) ou les envoyer tels quels.
 
 ## Fonctionnement
 

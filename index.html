@@ -3,1828 +3,604 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BasketballCoach — Créateur de systèmes</title>
+<title>BasketballCoach — Créez, animez et partagez vos systèmes de jeu</title>
+<meta name="description" content="Le playbook numérique de votre club. Dessinez vos systèmes de basketball, animez-les en temps réel et exportez-les en vidéo, images ou PDF. Gratuit, sans installation.">
 <style>
   :root {
-    --bg: #0f172a;
-    --panel: #1e293b;
-    --panel2: #263449;
-    --border: #334155;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --accent: #f97316;
-    --accent-dim: #c2540a;
-    --green: #22c55e;
-    --red: #ef4444;
+    --night: #000000;
+    --night-soft: #0a0a0a;
+    --white: #ffffff;
+    --white-mute: #f0f0fa;
+    --hairline: #3a3a3f;
+    --ball: #f97316;
+    --display: "D-DIN-Bold", "Arial Narrow", Arial, Verdana, sans-serif;
+    --body: "D-DIN", Arial, Verdana, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
+  html { scroll-behavior: smooth; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    background: var(--night);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0.32px;
+    overflow-x: hidden;
   }
 
-  /* ===== Header ===== */
-  header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  header .logo { font-size: 20px; }
-  header .brand { font-weight: 700; font-size: 15px; letter-spacing: .3px; white-space: nowrap; }
-  #titleInput {
-    flex: 1;
-    min-width: 160px;
-    max-width: 380px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 7px 12px;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  #titleInput:focus { outline: none; border-color: var(--accent); }
-  header .spacer { flex: 1; }
-  .btn {
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 7px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background .15s, border-color .15s;
-  }
-  .btn:hover { background: #31415c; border-color: #46587a; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-  .btn.primary:hover { background: #fb8a3c; }
-  .btn.danger:hover { border-color: var(--red); color: var(--red); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; }
-  .btn.small { padding: 3px 8px; font-size: 12px; border-radius: 6px; }
-
-  /* ===== Layout ===== */
-  main { flex: 1; display: flex; min-height: 0; }
-
-  /* ===== Sidebar ===== */
-  aside {
-    width: 300px;
-    min-width: 300px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  aside section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
-  aside h2 {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-    margin-bottom: 10px;
-    font-weight: 700;
-  }
-  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .row + .row { margin-top: 8px; }
-  .seg {
-    display: flex;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .seg button {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    padding: 6px 12px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .seg button.active { background: var(--accent); color: #fff; font-weight: 600; }
-  label.inline { font-size: 13px; color: var(--muted); }
-  input[type="number"] {
-    width: 62px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 5px 6px;
-    font-size: 13px;
-  }
-  select {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 5px 6px;
-    font-size: 13px;
-  }
-
-  /* ===== Phase list ===== */
-  #phasesSection { flex: 1; display: flex; flex-direction: column; min-height: 120px; }
-  #phaseList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-  .phase-item {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 10px;
-    cursor: pointer;
-    transition: border-color .15s;
-  }
-  .phase-item:hover { border-color: #46587a; }
-  .phase-item.selected { border-color: var(--accent); background: #251c12; }
-  .phase-item .top { display: flex; align-items: center; gap: 6px; }
-  .phase-item .num {
-    background: var(--panel2);
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 7px;
-    color: var(--muted);
-  }
-  .phase-item.selected .num { background: var(--accent); color: #fff; }
-  .phase-item input.pname {
-    flex: 1;
-    min-width: 0;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 2px 4px;
-    border-radius: 4px;
-  }
-  .phase-item input.pname:focus { outline: 1px solid var(--accent); background: var(--bg); }
-  .phase-item .bottom {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .phase-item .bottom input { width: 52px; }
-  .phase-item .icons { margin-left: auto; display: flex; gap: 2px; }
-  .icon-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 13px;
-    padding: 2px 4px;
-    border-radius: 4px;
-  }
-  .icon-btn:hover { background: var(--panel2); color: var(--text); }
-  .ball-tag { color: var(--accent); font-weight: 700; font-size: 11px; }
-
-  .hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 8px; }
-
-  /* ===== Court area ===== */
-  #courtArea {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  #canvasWrap { flex: 1; position: relative; min-height: 0; }
-  canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
-
-  /* ===== Playback bar ===== */
-  #playbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    background: var(--panel);
-    border-top: 1px solid var(--border);
-  }
-  #playBtn { width: 44px; font-size: 15px; }
-  #scrubWrap { flex: 1; position: relative; height: 26px; display: flex; align-items: center; }
-  #scrub { width: 100%; accent-color: var(--accent); cursor: pointer; }
-  #timeLabel { font-size: 12px; color: var(--muted); min-width: 86px; text-align: right; font-variant-numeric: tabular-nums; }
-  #recBadge {
-    display: none;
-    color: #fff;
-    background: var(--red);
-    border-radius: 6px;
-    padding: 3px 9px;
-    font-size: 12px;
-    font-weight: 700;
-    animation: blink 1s infinite;
-  }
-  @keyframes blink { 50% { opacity: .5; } }
-
-  #toast {
+  /* ===== Nav overlay ===== */
+  nav {
     position: fixed;
-    bottom: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 9px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .25s;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    padding: 24px 32px;
     z-index: 50;
+    transition: background .3s;
   }
-  #toast.show { opacity: 1; }
-
-  #screenPopup {
-    position: absolute;
-    display: none;
-    align-items: center;
-    gap: 8px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 10px;
-    font-size: 13px;
-    box-shadow: 0 6px 24px rgba(0,0,0,.4);
-    z-index: 20;
+  nav.scrolled { background: rgba(0,0,0,.85); backdrop-filter: blur(6px); }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--white);
+    text-decoration: none;
     white-space: nowrap;
   }
-  #screenPopup.show { display: flex; }
-  .scr-tag { color: #93c5fd; font-size: 11px; font-weight: 600; }
-
-  /* ===== Menu burger ===== */
-  #menuWrap { position: relative; }
-  #menuList {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 6px;
-    display: none;
-    flex-direction: column;
-    min-width: 235px;
-    z-index: 60;
-    box-shadow: 0 12px 34px rgba(0,0,0,.45);
+  .wordmark span { color: var(--ball); }
+  nav .links { display: flex; gap: 28px; margin-left: auto; }
+  nav .links a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.17px;
+    text-transform: uppercase;
+    line-height: 2;
+    opacity: .85;
   }
-  #menuList.show { display: flex; }
-  #menuList button {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    text-align: left;
-    padding: 9px 12px;
+  nav .links a:hover { opacity: 1; border-bottom: 1px solid var(--white); }
+
+  /* ===== Ghost pill CTA ===== */
+  .pill {
+    display: inline-block;
+    border: 1px solid var(--white);
+    border-radius: 32px;
+    padding: 18px 34px;
+    color: var(--white);
+    text-decoration: none;
     font-size: 13px;
-    border-radius: 8px;
+    font-weight: 700;
+    letter-spacing: 1.17px;
+    text-transform: uppercase;
+    line-height: 0.94;
+    transition: background .25s, color .25s;
+    background: transparent;
     cursor: pointer;
   }
-  #menuList button:hover { background: #31415c; }
-  #menuList button:disabled { opacity: .45; cursor: not-allowed; }
+  .pill:hover { background: var(--white); color: var(--night); }
 
-  /* ===== Modale ===== */
-  #modalOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(2,6,23,.6);
-    backdrop-filter: blur(2px);
-    display: none;
+  /* ===== Bands ===== */
+  section {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    overflow: hidden;
   }
-  #modalOverlay.show { display: flex; }
-  .modal-box {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 22px;
-    max-width: 430px;
-    width: 92%;
-    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  .band-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    padding: 96px 32px;
+    width: 100%;
   }
-  .modal-box h3 { font-size: 16px; margin-bottom: 8px; }
-  .modal-box p { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 18px; }
-  .modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    line-height: 2;
+    color: var(--white-mute);
+    opacity: .8;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(40px, 8vw, 84px);
+    line-height: 0.95;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    max-width: 900px;
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(34px, 5vw, 60px);
+    line-height: 1.1;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    max-width: 820px;
+  }
+  .lead {
+    font-size: 16px;
+    line-height: 1.7;
+    letter-spacing: 0.32px;
+    color: var(--white-mute);
+    max-width: 540px;
+    margin: 24px 0 40px;
+  }
+
+  /* hero */
+  #hero { text-align: left; }
+  #heroCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: .9;
+  }
+  #hero .band-inner { align-self: end; padding-bottom: 12vh; }
+
+  /* alternating layout bands */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .split.rev .viz { order: 2; }
+  .viz svg { width: 100%; height: auto; display: block; }
+  section.soft { background: var(--night-soft); }
+  section.hairline-top { border-top: 1px solid #1c1c20; }
+
+  /* exports band */
+  .export-list { margin-top: 48px; }
+  .export-row {
+    display: flex;
+    align-items: baseline;
+    gap: 28px;
+    padding: 26px 0;
+    border-bottom: 1px solid #1c1c20;
+  }
+  .export-row:first-child { border-top: 1px solid #1c1c20; }
+  .export-word {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3.6vw, 44px);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    min-width: 320px;
+  }
+  @media (max-width: 700px) {
+    .export-row { flex-direction: column; gap: 8px; }
+    .export-word { min-width: 0; }
+  }
+  .export-desc { color: var(--white-mute); opacity: .85; max-width: 520px; }
+
+  /* stats strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    text-align: center;
+  }
+  .stat b {
+    display: block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(44px, 6vw, 80px);
+    line-height: 0.95;
+    letter-spacing: 1.6px;
+  }
+  .stat small {
+    display: block;
+    margin-top: 14px;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--white-mute);
+    opacity: .75;
+  }
+  #cta-final { text-align: center; min-height: 88vh; }
+  #cta-final .band-inner { display: flex; flex-direction: column; align-items: center; }
+  #cta-final .lead { text-align: center; margin-left: auto; margin-right: auto; }
+
+  footer {
+    border-top: 1px solid #1c1c20;
+    padding: 32px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 40px;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--white-mute);
+  }
+  footer a { color: var(--white); text-decoration: underline; }
+  footer .micro {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: .6;
+  }
+
+  /* reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .split { grid-template-columns: 1fr; gap: 40px; }
+    .split.rev .viz { order: 0; }
+    nav .links { display: none; }
+    .stats { grid-template-columns: repeat(2, 1fr); gap: 48px 24px; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <span class="logo">🏀</span>
-  <span class="brand">BasketballCoach</span>
-  <input id="titleInput" value="Nouveau système" spellcheck="false">
-  <span class="spacer"></span>
-  <button class="btn" id="newBtn">Nouveau</button>
-  <div id="menuWrap">
-    <button class="btn" id="menuBtn" title="Menu">☰</button>
-    <div id="menuList">
-      <button id="importBtn">📂 Importer JSON</button>
-      <button id="exportBtn">💾 Exporter JSON</button>
-      <button id="imgBtn">🖼 Exporter les images (PNG)</button>
-      <button id="boardBtn">🖨 Planche imprimable / PDF</button>
-      <button id="videoBtn">🎥 Exporter la vidéo</button>
+<nav id="nav">
+  <a class="wordmark" href="#hero">Basketball<span>Coach</span></a>
+  <div class="links">
+    <a href="#phases">Créer</a>
+    <a href="#notation">Notation</a>
+    <a href="#lecture">Animation</a>
+    <a href="#exports">Exports</a>
+  </div>
+  <a class="pill" href="app.html">Lancer l'app</a>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="band-inner">
+    <div class="eyebrow">Le playbook numérique de votre club</div>
+    <h1>Vos systèmes<br>prennent vie</h1>
+    <p class="lead">Dessinez vos systèmes de jeu, animez-les en temps réel et partagez-les à toute l'équipe. Dans le navigateur, sans installation, gratuitement.</p>
+    <a class="pill" href="app.html">Lancer l'application</a>
+  </div>
+</section>
+
+<!-- ===== PHASES ===== -->
+<section id="phases" class="soft hairline-top">
+  <div class="band-inner split reveal">
+    <div>
+      <div class="eyebrow">01 — Créer</div>
+      <h2>Dessinez phase par phase</h2>
+      <p class="lead">Glissez vos cinq attaquants et jusqu'à cinq défenseurs sur un terrain FIBA. Chaque phase mémorise les positions et le porteur du ballon : passes et tirs se règlent en déposant simplement le ballon sur un joueur ou sur le cercle. Touches, lancers francs : les situations de départ sont prêtes à l'emploi.</p>
+      <a class="pill" href="app.html">Essayer maintenant</a>
+    </div>
+    <div class="viz">
+      <svg viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" aria-label="Demi-terrain avec joueurs et flèches">
+        <g stroke="#ffffff" stroke-opacity=".3" fill="none" stroke-width="1.5">
+          <rect x="30" y="20" width="400" height="360" />
+          <rect x="150" y="20" width="160" height="150" />
+          <circle cx="230" cy="170" r="46" />
+          <path d="M 30 200 A 200 176 0 0 0 430 200" transform="rotate(180 230 200) translate(0 -180)" opacity="0"/>
+          <path d="M 54 20 L 54 96 A 176 176 0 0 0 406 96 L 406 20" />
+          <line x1="200" y1="50" x2="260" y2="50" stroke-width="3" />
+          <circle cx="230" cy="62" r="8" stroke="#f97316" stroke-opacity=".9" />
+        </g>
+        <!-- flèches -->
+        <g stroke="#ffffff" stroke-opacity=".75" fill="none" stroke-width="2.5">
+          <path d="M 230 330 L 160 240" marker-end="url(#ah)"/>
+          <path d="M 350 290 L 300 120" marker-end="url(#ah)"/>
+          <path d="M 120 300 L 300 300" stroke-dasharray="7 7" marker-end="url(#ah)"/>
+        </g>
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 Z" fill="#ffffff" fill-opacity=".75"/>
+          </marker>
+        </defs>
+        <!-- joueurs -->
+        <g font-family="Arial Narrow, Arial" font-weight="700" font-size="15" text-anchor="middle">
+          <circle cx="230" cy="330" r="15" fill="#15803d"/><text x="230" y="335" fill="#fff">1</text>
+          <circle cx="120" cy="300" r="15" fill="#15803d"/><text x="120" y="305" fill="#fff">2</text>
+          <circle cx="350" cy="290" r="15" fill="#15803d"/><text x="350" y="295" fill="#fff">3</text>
+          <circle cx="160" cy="120" r="15" fill="#15803d"/><text x="160" y="125" fill="#fff">4</text>
+          <circle cx="305" cy="150" r="15" fill="#dc2626"/><text x="305" y="155" fill="#fff">3</text>
+          <circle cx="190" cy="255" r="15" fill="#dc2626"/><text x="190" y="260" fill="#fff">1</text>
+          <circle cx="248" cy="318" r="8" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+        </g>
+      </svg>
     </div>
   </div>
-  <input type="file" id="fileInput" accept=".json,application/json" hidden>
-</header>
+</section>
 
-<main>
-  <aside>
-    <section>
-      <h2>Terrain</h2>
-      <div class="row">
-        <div class="seg" id="courtSeg">
-          <button data-mode="half" class="active">Demi-terrain</button>
-          <button data-mode="full">Terrain complet</button>
-        </div>
-      </div>
-      <div class="row">
-        <label class="inline">Situation</label>
-        <select id="situationSel" title="Position initiale (phase 1)">
-          <option value="defaut">Attaque placée</option>
-          <option value="cote_gauche">Côté gauche</option>
-          <option value="cote_droit">Côté droit</option>
-          <option value="fond_gauche">Fond gauche</option>
-          <option value="fond_droit">Fond droit</option>
-          <option value="lf_attaque">Lancer franc attaque</option>
-          <option value="lf_defense">Lancer franc défense</option>
-        </select>
-      </div>
-      <div class="row">
-        <label class="inline">Défenseurs</label>
-        <select id="defCount">
-          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-        </select>
-        <button class="btn small" id="autoDefBtn" title="Place chaque défenseur entre son attaquant et le panier">Placement auto</button>
-      </div>
-    </section>
-
-    <section id="phasesSection">
-      <h2>Phases <span style="float:right"><button class="btn small primary" id="addPhaseBtn">+ Phase</button></span></h2>
-      <div id="phaseList"></div>
-      <div class="hint">
-        Glisse les joueurs sur le terrain pour définir leurs positions à chaque phase.
-        Glisse le <b style="color:var(--accent)">ballon</b> sur un joueur pour lui donner, ou sur le panier pour un tir.
-        Glisse un joueur <i>sans ballon</i> sur un défenseur pour poser un <b>écran</b> (clique sur le T pour le retirer).
-        Tire sur le petit point au milieu d'une flèche pour <b>courber</b> la trajectoire (double-clic sur un point pour le retirer).
-      </div>
-    </section>
-
-    <section>
-      <h2>Raccourcis</h2>
-      <div class="hint" style="margin-top:0">
-        <b>Espace</b> lecture / pause · <b>← →</b> changer de phase · <b>Ctrl+Z</b> annuler
-      </div>
-    </section>
-  </aside>
-
-  <div id="courtArea">
-    <div id="canvasWrap"><canvas id="cv"></canvas></div>
-    <div id="playbar">
-      <button class="btn" id="stopBtn" title="Retour au début">⏮</button>
-      <button class="btn primary" id="playBtn" title="Lecture / pause">▶</button>
-      <div id="scrubWrap"><input type="range" id="scrub" min="0" max="1000" value="0"></div>
-      <span id="timeLabel">0.0 / 0.0 s</span>
-      <select id="speedSel" title="Vitesse de lecture">
-        <option value="0.5">×0.5</option>
-        <option value="0.75">×0.75</option>
-        <option value="1" selected>×1</option>
-        <option value="1.5">×1.5</option>
-        <option value="2">×2</option>
-      </select>
-      <span id="recBadge">● REC</span>
+<!-- ===== NOTATION ===== -->
+<section id="notation" class="hairline-top">
+  <div class="band-inner split rev reveal">
+    <div>
+      <div class="eyebrow">02 — Notation d'entraîneur</div>
+      <h2>Écrans, courbes, la vraie notation</h2>
+      <p class="lead">Posez un écran en déposant un joueur sur un défenseur : le symbole en T s'oriente tout seul. Courbez n'importe quelle trajectoire en tirant sur la flèche, ajoutez autant de points de passage que nécessaire. Vos schémas parlent le langage du terrain.</p>
+      <a class="pill" href="app.html">Dessiner un système</a>
+    </div>
+    <div class="viz">
+      <svg viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" aria-label="Écran en T et trajectoire courbe">
+        <g stroke="#ffffff" stroke-opacity=".3" fill="none" stroke-width="1.5">
+          <rect x="30" y="20" width="400" height="360"/>
+          <rect x="150" y="20" width="160" height="150"/>
+          <circle cx="230" cy="170" r="46"/>
+          <line x1="200" y1="50" x2="260" y2="50" stroke-width="3"/>
+          <circle cx="230" cy="62" r="8" stroke="#f97316" stroke-opacity=".9"/>
+        </g>
+        <!-- trajectoire courbe -->
+        <path d="M 340 330 C 390 220 330 150 262 110" fill="none" stroke="#ffffff" stroke-opacity=".8" stroke-width="2.5" marker-end="url(#ah2)"/>
+        <circle cx="352" cy="212" r="5.5" fill="#fff"/>
+        <!-- écran en T -->
+        <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+          <line x1="163" y1="196" x2="207" y2="196"/>
+          <line x1="185" y1="196" x2="185" y2="218"/>
+        </g>
+        <defs>
+          <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 Z" fill="#ffffff" fill-opacity=".8"/>
+          </marker>
+        </defs>
+        <g font-family="Arial Narrow, Arial" font-weight="700" font-size="15" text-anchor="middle">
+          <circle cx="185" cy="240" r="15" fill="#15803d"/><text x="185" y="245" fill="#fff">5</text>
+          <circle cx="185" cy="176" r="15" fill="#dc2626"/><text x="185" y="181" fill="#fff">2</text>
+          <circle cx="340" cy="330" r="15" fill="#15803d"/><text x="340" y="335" fill="#fff">2</text>
+          <circle cx="358" cy="318" r="8" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
+        </g>
+      </svg>
     </div>
   </div>
-</main>
+</section>
 
-<div id="modalOverlay"><div class="modal-box"><h3></h3><p></p><div class="modal-btns"></div></div></div>
-<div id="toast"></div>
+<!-- ===== LECTURE ===== -->
+<section id="lecture" class="soft hairline-top">
+  <div class="band-inner split reveal">
+    <div>
+      <div class="eyebrow">03 — Animation</div>
+      <h2>Regardez le système se jouer</h2>
+      <p class="lead">Un clic et vos joueurs se déplacent, le ballon dribble, vole sur les passes et monte au cercle sur les tirs. Vitesse réglable, timeline précise à la frame. Ce que vous dessinez au tableau, vos joueurs le voient en mouvement.</p>
+      <a class="pill" href="app.html">Voir en mouvement</a>
+    </div>
+    <div class="viz"><canvas id="playCanvas" width="460" height="400" style="width:100%;height:auto;border:1px solid #1c1c20;border-radius:8px"></canvas></div>
+  </div>
+</section>
+
+<!-- ===== EXPORTS ===== -->
+<section id="exports" class="hairline-top">
+  <div class="band-inner reveal">
+    <div class="eyebrow">04 — Partager</div>
+    <h2>Du terrain au vestiaire</h2>
+    <div class="export-list">
+      <div class="export-row"><span class="export-word">Vidéo</span><span class="export-desc">L'animation complète en MP4/WebM, prête pour le groupe WhatsApp de l'équipe.</span></div>
+      <div class="export-row"><span class="export-word">Images</span><span class="export-desc">Un PNG par phase avec flèches et écrans, pour le tableau blanc ou le cahier.</span></div>
+      <div class="export-row"><span class="export-word">Planche PDF</span><span class="export-desc">Toutes les phases en grille imprimable, le playbook papier en un clic.</span></div>
+      <div class="export-row"><span class="export-word">JSON</span><span class="export-desc">Le système complet dans un fichier, à partager entre coachs et réimporter à l'identique.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="soft hairline-top" style="min-height:70vh">
+  <div class="band-inner reveal">
+    <div class="stats">
+      <div class="stat"><b>0</b><small>Installation</small></div>
+      <div class="stat"><b>1</b><small>Fichier, hors ligne</small></div>
+      <div class="stat"><b>10</b><small>Joueurs animés</small></div>
+      <div class="stat"><b>∞</b><small>Systèmes</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA FINAL ===== -->
+<section id="cta-final" class="hairline-top">
+  <div class="band-inner reveal">
+    <div class="eyebrow">Prêt pour le prochain entraînement ?</div>
+    <h2 style="max-width:100%">Le prochain système<br>commence ici</h2>
+    <p class="lead">Ouvrez l'application, placez vos joueurs, appuyez sur lecture.</p>
+    <a class="pill" href="app.html">Lancer l'application</a>
+  </div>
+</section>
+
+<footer>
+  <span class="micro">BasketballCoach</span>
+  <span>Créé pour les entraîneurs, par un entraîneur de salon.</span>
+  <a href="app.html">Application</a>
+</footer>
 
 <script>
 "use strict";
 
-/* ============================================================
-   BasketballCoach — éditeur de systèmes de jeu
-   Coordonnées : terrain complet FIBA 28 m × 15 m, en mètres.
-   Panier gauche (1.575, 7.5), panier droit (26.425, 7.5).
-   Vue demi-terrain : portrait, panier en haut
-   (écranX ∝ y, écranY ∝ x, x ∈ [0, 14]).
-   ============================================================ */
+/* ===== Nav au scroll ===== */
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 40), { passive: true });
 
-const COURT = { W: 28, H: 15, HALF: 14, M: 1.1 };          // M : marge hors limites (m)
-const HOOP_L = { x: 1.575, y: 7.5 };
-const HOOP_R = { x: 26.425, y: 7.5 };
-const R_PLAYER = 0.42;                                      // rayon joueur (m)
-const R_BALL = 0.23;                                        // rayon ballon (m)
-const BALL_OFF = { x: 0.42, y: -0.34 };                     // offset ballon / porteur
-const ATT_IDS = ["a1","a2","a3","a4","a5"];
-const DEF_IDS = ["d1","d2","d3","d4","d5"];
-const ALL_IDS = [...ATT_IDS, ...DEF_IDS];
-const START_HOLD = 0.5, END_HOLD = 0.8;                     // pauses début / fin (s)
+/* ===== Reveal au scroll ===== */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("in"); });
+}, { threshold: 0.15 });
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-const COLORS = {
-  attacker: "#15803d", attackerEdge: "#dcfce7",
-  defender: "#dc2626", defenderEdge: "#fee2e2",
-  ball: "#f97316", ballEdge: "#7c2d12",
-  floor: "#efdcbd", floorOut: "#e2c99f", line: "#8a5a2b",
-  key: "#e4bd8c",
-};
+/* ===== Hero : système de jeu animé en boucle ===== */
+(function heroAnim() {
+  const cv = document.getElementById("heroCanvas");
+  const ctx = cv.getContext("2d");
+  const dpr = Math.min(2, devicePixelRatio || 1);
 
-/* ---------- État ---------- */
-
-function defaultPositions() {
-  const p = {
-    a1: { x: 8.6, y: 7.5 },  a2: { x: 7.0, y: 2.6 },  a3: { x: 7.0, y: 12.4 },
-    a4: { x: 2.6, y: 5.1 },  a5: { x: 2.6, y: 9.9 },
-  };
-  ATT_IDS.forEach((id, i) => {
-    const a = p[id];
-    const v = { x: HOOP_L.x - a.x, y: HOOP_L.y - a.y };
-    const n = Math.hypot(v.x, v.y) || 1;
-    p[DEF_IDS[i]] = { x: a.x + v.x / n * 1.5, y: a.y + v.y / n * 1.5 };
-  });
-  return p;
-}
-
-/* ---------- Situations initiales ---------- */
-// Les deux vues étant cohérentes (rotation pure), gauche/droite du panier
-// sont identiques partout : y grand = gauche du panier, y petit = droite.
-// Les coordonnées de base ci-dessous décrivent la variante "droite" (y petit);
-// la variante "gauche" est le miroir y -> 15 - y.
-
-const SITUATION_LABELS = {
-  defaut: "Attaque placée", cote_gauche: "Côté gauche", cote_droit: "Côté droit",
-  fond_gauche: "Fond gauche", fond_droit: "Fond droit",
-  lf_attaque: "Lancer franc attaque", lf_defense: "Lancer franc défense",
-};
-
-function situationPositions(baseKey) {
-  const A = {}, D = {};
-  let ball = "a1";
-  // spots de rebond le long de la raquette (1er = près de la ligne de fond)
-  const spot = (n, side) => ({ x: 2.2 + (n - 1) * 1.4, y: side < 0 ? 4.6 : 10.4 });
-  switch (baseKey) {
-    case "cote_gauche":   // remise en touche, ligne de côté
-      Object.assign(A, {
-        a1: { x: 6.5, y: -0.5 },  a2: { x: 5.2, y: 2.8 },  a3: { x: 8.6, y: 4.8 },
-        a4: { x: 2.6, y: 4.8 },   a5: { x: 4.2, y: 9.6 },
-      });
-      break;
-    case "fond_gauche":   // remise en fond de terrain, alignement en boîte
-      Object.assign(A, {
-        a1: { x: -0.5, y: 5.3 },
-        a2: spot(1, -1), a3: spot(1, 1), a4: spot(3, -1), a5: spot(3, 1),
-      });
-      break;
-    case "lf_attaque":    // notre lancer franc : a1 tire
-      // Raquette : tireur + 2 attaquants (2e spots) + 3 défenseurs (1er spots x2, 3e spot x1)
-      Object.assign(A, {
-        a1: { x: 5.8, y: 7.5 },
-        a4: spot(2, -1), a5: spot(2, 1),
-        a2: { x: 8.4, y: 4.0 }, a3: { x: 8.9, y: 10.6 },
-      });
-      Object.assign(D, {
-        d4: spot(1, -1), d5: spot(1, 1), d2: spot(3, -1),
-        d1: { x: 9.2, y: 7.5 },   // hors de la zone à 3 points
-        d3: { x: 8.8, y: 10.0 },
-      });
-      break;
-    case "lf_defense":    // lancer franc adverse : d1 sur la ligne, ballon au joueur 1
-      // Raquette : tireur + 2 attaquants adverses (2e spots) + 3 défenseurs à nous (1er spots x2, 3e spot x1)
-      Object.assign(A, {
-        a4: spot(1, -1), a5: spot(1, 1), a3: spot(3, -1),
-        a2: { x: 8.0, y: 4.5 }, a1: { x: 9.5, y: 7.5 },
-      });
-      Object.assign(D, {
-        d1: { x: 5.8, y: 7.5 }, d2: spot(2, -1), d3: spot(2, 1),
-        d4: { x: 8.8, y: 5.5 }, d5: { x: 8.8, y: 9.5 },
-      });
-      break;
+  function resize() {
+    cv.width = cv.clientWidth * dpr;
+    cv.height = cv.clientHeight * dpr;
   }
-  return { A, D, ball };
-}
-
-function applySituation(key) {
-  if (!key) return;
-  pushUndo();
-  const ph = state.phases[0];
-  if (key === "defaut") {
-    ph.pos = defaultPositions();
-    ph.ball = "a1";
-  } else {
-    const baseKey = key.replace("_droit", "_gauche");
-    const { A, D, ball } = situationPositions(baseKey);
-    // base = variante "droite"; miroir pour la variante "gauche" (identique dans les deux vues)
-    const flip = !key.endsWith("_droit");
-    const put = (id, p) => {
-      ph.pos[id] = clampToCourt(flip ? { x: p.x, y: 15 - p.y } : { x: p.x, y: p.y });
-    };
-    Object.entries(A).forEach(([id, p]) => put(id, p));
-    if (Object.keys(D).length) {
-      Object.entries(D).forEach(([id, p]) => put(id, p));
-      if (state.defenders === 0) state.defenders = 5;   // le LF n'a de sens qu'avec des défenseurs
-    } else {
-      // marquage automatique des défenseurs visibles
-      for (let i = 0; i < 5; i++) {
-        const a = ph.pos[ATT_IDS[i]];
-        const hoop = nearestHoop(a);
-        const v = { x: hoop.x - a.x, y: hoop.y - a.y };
-        const n = Math.hypot(v.x, v.y) || 1;
-        ph.pos[DEF_IDS[i]] = clampToCourt({ x: a.x + v.x / n * 1.4, y: a.y + v.y / n * 1.4 });
-      }
-    }
-    ph.ball = ball;
-  }
-  ph.screens = [];
-  state.situation = key;
-  sel = 0;
-  syncUI(); save();
-  toast("Situation appliquée : " + SITUATION_LABELS[key]);
-}
-
-function makePhase(base, n) {
-  return {
-    name: "Phase " + n,
-    duration: 1.5,
-    ball: base ? base.ball : "a1",
-    pos: base ? JSON.parse(JSON.stringify(base.pos)) : defaultPositions(),
-    screens: [],   // [{ s: 'aX' (poseur), d: 'dY' (défenseur) }]
-    via: {},       // points de passage par jeton : { a1: [{x,y}, ...] }
-  };
-}
-
-function normalizePhases() {
-  state.phases.forEach((ph) => {
-    if (!Array.isArray(ph.screens)) ph.screens = [];
-    if (!ph.via || typeof ph.via !== "object") ph.via = {};
-  });
-}
-
-function defaultState() {
-  return {
-    app: "basketballcoach-web", version: 1,
-    title: "Nouveau système",
-    courtMode: "half",
-    defenders: 0,
-    situation: "defaut",
-    phases: [makePhase(null, 1)],
-  };
-}
-
-let state = defaultState();
-let sel = 0;                       // phase sélectionnée
-let playing = false, playT = 0, speed = 1;
-let recording = false;
-let undoStack = [];
-
-/* ---------- Utilitaires ---------- */
-
-const $ = (s) => document.querySelector(s);
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const lerp = (a, b, t) => a + (b - a) * t;
-const ease = (t) => t * t * (3 - 2 * t);   // smoothstep
-const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
-
-function showModal(title, msg, buttons) {
-  const ov = $("#modalOverlay");
-  ov.querySelector("h3").textContent = title;
-  ov.querySelector("p").textContent = msg;
-  const bx = ov.querySelector(".modal-btns");
-  bx.innerHTML = "";
-  buttons.forEach((b) => {
-    const btn = document.createElement("button");
-    btn.className = "btn" + (b.primary ? " primary" : "");
-    btn.textContent = b.label;
-    btn.addEventListener("click", () => { ov.classList.remove("show"); if (b.action) b.action(); });
-    bx.appendChild(btn);
-  });
-  ov.classList.add("show");
-}
-
-function toast(msg) {
-  const el = $("#toast");
-  el.textContent = msg;
-  el.classList.add("show");
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove("show"), 2600);
-}
-
-function pushUndo() {
-  undoStack.push(JSON.stringify(state));
-  if (undoStack.length > 60) undoStack.shift();
-}
-function undo() {
-  if (!undoStack.length) return;
-  state = JSON.parse(undoStack.pop());
-  sel = clamp(sel, 0, state.phases.length - 1);
-  syncUI(); save();
-}
-
-function save() {
-  try { localStorage.setItem("bballcoach", JSON.stringify(state)); } catch (e) {}
-}
-
-/* ---------- Canvas & projection ---------- */
-
-const cv = $("#cv"), ctx = cv.getContext("2d");
-let view = { s: 1, ox: 0, oy: 0 };   // échelle px/m + origine écran du point terrain (0,0)
-
-function resize() {
-  const wrap = $("#canvasWrap");
-  const dpr = window.devicePixelRatio || 1;
-  cv.width = wrap.clientWidth * dpr;
-  cv.height = wrap.clientHeight * dpr;
-  computeView();
-}
-window.addEventListener("resize", resize);
-
-function computeView() {
-  const W = cv.width, H = cv.height;
-  const half = state.courtMode === "half";
-  const cw = half ? COURT.H : COURT.W;        // largeur vue (m)
-  const ch = half ? COURT.HALF : COURT.H;     // hauteur vue (m)
-  const s = Math.min(W / (cw + 2 * COURT.M), H / (ch + 2 * COURT.M));
-  view = {
-    s,
-    ox: (W - cw * s) / 2,
-    oy: (H - ch * s) / 2,
-  };
-}
-
-// terrain (m) -> écran (px)
-// La vue demi-terrain est une ROTATION pure de la vue complète (pas de miroir) :
-// ce qui est à gauche du panier reste à gauche du panier dans les deux vues.
-function c2s(x, y) {
-  const { s, ox, oy } = view;
-  if (state.courtMode === "half") return [ox + (COURT.H - y) * s, oy + x * s];
-  return [ox + x * s, oy + y * s];
-}
-// écran (px) -> terrain (m)
-function s2c(px, py) {
-  const { s, ox, oy } = view;
-  if (state.courtMode === "half") return { x: (py - oy) / s, y: COURT.H - (px - ox) / s };
-  return { x: (px - ox) / s, y: (py - oy) / s };
-}
-
-function clampToCourt(p) {
-  const half = state.courtMode === "half";
-  return {
-    x: clamp(p.x, -COURT.M + 0.2, (half ? COURT.HALF : COURT.W) + COURT.M - 0.2),
-    y: clamp(p.y, -COURT.M + 0.2, COURT.H + COURT.M - 0.2),
-  };
-}
-
-/* ---------- Dessin du terrain ---------- */
-
-function setCourtTransform() {
-  const { s, ox, oy } = view;
-  // demi-terrain : screenX = ox + (15 - y)*s, screenY = oy + x*s (rotation, det > 0)
-  if (state.courtMode === "half") ctx.setTransform(0, s, -s, 0, ox + COURT.H * s, oy);
-  else ctx.setTransform(s, 0, 0, s, ox, oy);
-}
-
-function drawCourt() {
-  const half = state.courtMode === "half";
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.fillStyle = COLORS.floorOut;
-  ctx.fillRect(0, 0, cv.width, cv.height);
-
-  setCourtTransform();
-  ctx.lineWidth = 0.06;
-  ctx.strokeStyle = COLORS.line;
-  ctx.lineCap = "round";
-
-  const XMAX = half ? COURT.HALF : COURT.W;
-
-  // sol
-  ctx.fillStyle = COLORS.floor;
-  ctx.fillRect(0, 0, XMAX, COURT.H);
-
-  // raquettes peintes
-  ctx.fillStyle = COLORS.key;
-  ctx.fillRect(0, 7.5 - 2.45, 5.8, 4.9);
-  if (!half) ctx.fillRect(COURT.W - 5.8, 7.5 - 2.45, 5.8, 4.9);
-
-  // limites
-  ctx.strokeRect(0, 0, XMAX, COURT.H);
-
-  // ligne médiane + cercle central
-  ctx.beginPath();
-  ctx.moveTo(14, 0); ctx.lineTo(14, COURT.H);
-  ctx.stroke();
-  ctx.beginPath();
-  if (half) ctx.arc(14, 7.5, 1.8, Math.PI / 2, Math.PI * 1.5);
-  else ctx.arc(14, 7.5, 1.8, 0, Math.PI * 2);
-  ctx.stroke();
-
-  drawEnd(false);
-  if (!half) drawEnd(true);
-
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-}
-
-// dessine un côté du terrain (mirror = côté droit)
-function drawEnd(mirror) {
-  const mx = (x) => (mirror ? COURT.W - x : x);
-  const hoop = mirror ? HOOP_R : HOOP_L;
-
-  // raquette
-  ctx.strokeRect(Math.min(mx(0), mx(5.8)), 7.5 - 2.45, 5.8, 4.9);
-
-  // cercle des lancers francs
-  ctx.beginPath();
-  ctx.arc(mx(5.8), 7.5, 1.8, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // planche
-  ctx.beginPath();
-  ctx.moveTo(mx(1.2), 6.6); ctx.lineTo(mx(1.2), 8.4);
-  ctx.lineWidth = 0.1;
-  ctx.stroke();
-  ctx.lineWidth = 0.06;
-
-  // arceau
-  ctx.beginPath();
-  ctx.arc(hoop.x, hoop.y, 0.225, 0, Math.PI * 2);
-  ctx.strokeStyle = "#c2410c";
-  ctx.stroke();
-  ctx.strokeStyle = COLORS.line;
-
-  // demi-cercle de non-charge
-  ctx.beginPath();
-  const nc0 = mirror ? Math.PI / 2 : -Math.PI / 2;
-  ctx.arc(hoop.x, hoop.y, 1.25, nc0, nc0 + Math.PI, mirror);
-  ctx.stroke();
-
-  // ligne à 3 points : segments de coin + arc (r = 6.75)
-  const cornerX = 2.99;
-  ctx.beginPath();
-  ctx.moveTo(mx(0), 0.9); ctx.lineTo(mx(cornerX), 0.9);
-  ctx.moveTo(mx(0), 14.1); ctx.lineTo(mx(cornerX), 14.1);
-  ctx.stroke();
-  const dy = 6.6, dx = Math.sqrt(6.75 * 6.75 - dy * dy);
-  const a1 = Math.atan2(-dy, mirror ? -dx : dx);
-  const a2 = Math.atan2(dy, mirror ? -dx : dx);
-  ctx.beginPath();
-  ctx.arc(hoop.x, hoop.y, 6.75, a1, a2, mirror);
-  ctx.stroke();
-}
-
-/* ---------- Dessin des jetons ---------- */
-
-function visibleIds() {
-  return [...ATT_IDS, ...DEF_IDS.slice(0, state.defenders)];
-}
-
-function drawToken(id, p, alpha = 1) {
-  const [sx, sy] = c2s(p.x, p.y);
-  const r = R_PLAYER * view.s;
-  const att = id[0] === "a";
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  // ombre
-  ctx.beginPath();
-  ctx.ellipse(sx, sy + r * 0.45, r * 0.95, r * 0.4, 0, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(0,0,0,.18)";
-  ctx.fill();
-  // cercle
-  ctx.beginPath();
-  ctx.arc(sx, sy, r, 0, Math.PI * 2);
-  ctx.fillStyle = att ? COLORS.attacker : COLORS.defender;
-  ctx.fill();
-  ctx.lineWidth = Math.max(1.5, r * 0.13);
-  ctx.strokeStyle = "#ffffff";
-  ctx.stroke();
-  // numéro
-  ctx.fillStyle = "#fff";
-  ctx.font = `700 ${r * 1.05}px -apple-system, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(id[1], sx, sy + r * 0.05);
-  ctx.restore();
-}
-
-function drawBall(p, alpha = 1, scale = 1) {
-  const [sx, sy] = c2s(p.x, p.y);
-  const r = R_BALL * view.s * scale;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.beginPath();
-  ctx.arc(sx, sy, r, 0, Math.PI * 2);
-  ctx.fillStyle = COLORS.ball;
-  ctx.fill();
-  ctx.lineWidth = Math.max(1, r * 0.16);
-  ctx.strokeStyle = COLORS.ballEdge;
-  ctx.stroke();
-  // coutures
-  ctx.beginPath();
-  ctx.moveTo(sx - r, sy); ctx.lineTo(sx + r, sy);
-  ctx.moveTo(sx, sy - r); ctx.lineTo(sx, sy + r);
-  ctx.lineWidth = Math.max(0.7, r * 0.09);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawArrow(from, to, color, dashed = false, alpha = 0.85) {
-  const [x1, y1] = c2s(from.x, from.y);
-  const [x2, y2] = c2s(to.x, to.y);
-  const ang = Math.atan2(y2 - y1, x2 - x1);
-  const head = Math.max(7, view.s * 0.32);
-  // raccourcir pour ne pas entrer dans le jeton
-  const back = R_PLAYER * view.s * 1.15;
-  const len = Math.hypot(x2 - x1, y2 - y1);
-  if (len < back * 1.4) return;
-  const ex = x2 - Math.cos(ang) * back;
-  const ey = y2 - Math.sin(ang) * back;
-  const bx = x1 + Math.cos(ang) * back;
-  const by = y1 + Math.sin(ang) * back;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = Math.max(2, view.s * 0.09);
-  ctx.setLineDash(dashed ? [8, 7] : []);
-  ctx.beginPath();
-  ctx.moveTo(bx, by);
-  ctx.lineTo(ex - Math.cos(ang) * head * 0.7, ey - Math.sin(ang) * head * 0.7);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(ex, ey);
-  ctx.lineTo(ex - head * Math.cos(ang - 0.42), ey - head * Math.sin(ang - 0.42));
-  ctx.lineTo(ex - head * Math.cos(ang + 0.42), ey - head * Math.sin(ang + 0.42));
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
-
-/* ---------- Trajectoires courbes (Catmull-Rom) ---------- */
-
-// points d'ancrage d'un déplacement : position précédente, via..., position courante
-function pathPoints(A, B, id) {
-  return [A.pos[id], ...((B.via && B.via[id]) || []), B.pos[id]];
-}
-
-// point sur la spline Catmull-Rom passant par pts, t ∈ [0,1]
-function crPoint(pts, t) {
-  const n = pts.length - 1;
-  if (n <= 0) return { ...pts[0] };
-  const ft = clamp(t, 0, 1) * n;
-  const i = Math.min(n - 1, Math.floor(ft));
-  const u = ft - i;
-  const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n, i + 2)];
-  const cr = (a, b, c, d) =>
-    0.5 * (2 * b + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u * u + (-a + 3 * b - 3 * c + d) * u * u * u);
-  return { x: cr(p0.x, p1.x, p2.x, p3.x), y: cr(p0.y, p1.y, p2.y, p3.y) };
-}
-
-// position d'un jeton pendant la transition A -> B
-function posAlong(A, B, id, e) {
-  const pts = pathPoints(A, B, id);
-  if (pts.length > 2) return crPoint(pts, e);
-  return { x: lerp(pts[0].x, pts[1].x, e), y: lerp(pts[0].y, pts[1].y, e) };
-}
-
-// flèche suivant la spline (retombe sur drawArrow si trajectoire droite)
-function drawPathArrow(pts, color, dashed = false, alpha = 0.85) {
-  if (pts.length === 2) return drawArrow(pts[0], pts[1], color, dashed, alpha);
-  const S = 32;
-  const scr = [];
-  for (let k = 0; k <= S; k++) {
-    const p = crPoint(pts, k / S);
-    scr.push(c2s(p.x, p.y));
-  }
-  const back = R_PLAYER * view.s * 1.15;
-  let i0 = 0, i1 = scr.length - 1;
-  while (i0 < i1 && Math.hypot(scr[i0][0] - scr[0][0], scr[i0][1] - scr[0][1]) < back) i0++;
-  while (i1 > i0 && Math.hypot(scr[i1][0] - scr[S][0], scr[i1][1] - scr[S][1]) < back) i1--;
-  if (i1 - i0 < 2) return;
-  const ang = Math.atan2(scr[i1][1] - scr[i1 - 1][1], scr[i1][0] - scr[i1 - 1][0]);
-  const head = Math.max(7, view.s * 0.32);
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = Math.max(2, view.s * 0.09);
-  ctx.lineJoin = "round";
-  ctx.setLineDash(dashed ? [8, 7] : []);
-  ctx.beginPath();
-  ctx.moveTo(scr[i0][0], scr[i0][1]);
-  for (let k = i0 + 1; k <= i1; k++) ctx.lineTo(scr[k][0], scr[k][1]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  const ex = scr[i1][0], ey = scr[i1][1];
-  ctx.beginPath();
-  ctx.moveTo(ex, ey);
-  ctx.lineTo(ex - head * Math.cos(ang - 0.42), ey - head * Math.sin(ang - 0.42));
-  ctx.lineTo(ex - head * Math.cos(ang + 0.42), ey - head * Math.sin(ang + 0.42));
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
-
-function tokenMoving(prev, phase, id) {
-  return dist(prev.pos[id], phase.pos[id]) > 0.35 || ((phase.via && phase.via[id]) || []).length > 0;
-}
-
-function drawHandleDot(p, real) {
-  const [sx, sy] = c2s(p.x, p.y);
-  const r = Math.max(4, view.s * 0.14) * (real ? 1.3 : 1);
-  ctx.save();
-  ctx.globalAlpha = real ? 0.95 : 0.5;
-  ctx.beginPath();
-  ctx.arc(sx, sy, r, 0, Math.PI * 2);
-  ctx.fillStyle = "#ffffff";
-  ctx.fill();
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = "#334155";
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawHandles(prev, phase) {
-  visibleIds().forEach((id) => {
-    if (!tokenMoving(prev, phase, id)) return;
-    const pts = pathPoints(prev, phase, id);
-    const n = pts.length - 1;
-    for (let k = 0; k < n; k++) drawHandleDot(crPoint(pts, (k + 0.5) / n), false);
-    ((phase.via && phase.via[id]) || []).forEach((v) => drawHandleDot(v, true));
-  });
-}
-
-/* ---------- Écrans ---------- */
-
-// Symbole en T : barre perpendiculaire côté défenseur, queue vers le poseur
-function drawScreen(sPos, dPos, alpha = 1) {
-  const dx = dPos.x - sPos.x, dy = dPos.y - sPos.y;
-  const n = Math.hypot(dx, dy) || 1;
-  const ux = dx / n, uy = dy / n;              // direction poseur -> défenseur
-  const bar = {
-    x: dPos.x - ux * (R_PLAYER + 0.3),
-    y: dPos.y - uy * (R_PLAYER + 0.3),
-  };
-  const HALF_BAR = 0.65, TAIL = 0.6;
-  const [x1, y1] = c2s(bar.x + uy * HALF_BAR, bar.y - ux * HALF_BAR);
-  const [x2, y2] = c2s(bar.x - uy * HALF_BAR, bar.y + ux * HALF_BAR);
-  const [x3, y3] = c2s(bar.x, bar.y);
-  const [x4, y4] = c2s(bar.x - ux * TAIL, bar.y - uy * TAIL);
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.strokeStyle = "#1e293b";
-  ctx.lineCap = "round";
-  ctx.lineWidth = Math.max(3, view.s * 0.13);
-  ctx.beginPath();
-  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);   // barre du T
-  ctx.moveTo(x3, y3); ctx.lineTo(x4, y4);   // queue vers le poseur
-  ctx.stroke();
-  ctx.restore();
-}
-
-// centre de la barre du T (pour le hit-test de suppression)
-function screenBarCenter(phase, sc) {
-  const sPos = phase.pos[sc.s], dPos = phase.pos[sc.d];
-  const dx = dPos.x - sPos.x, dy = dPos.y - sPos.y;
-  const n = Math.hypot(dx, dy) || 1;
-  return { x: dPos.x - dx / n * (R_PLAYER + 0.3), y: dPos.y - dy / n * (R_PLAYER + 0.3) };
-}
-
-function visibleScreens(phase) {
-  return (phase.screens || []).filter((sc) =>
-    DEF_IDS.indexOf(sc.d) < state.defenders);
-}
-
-// retire les écrans devenus incohérents (poseur trop loin du défenseur)
-function cleanupScreens(phase) {
-  if (!phase.screens) return;
-  phase.screens = phase.screens.filter((sc) =>
-    dist(phase.pos[sc.s], phase.pos[sc.d]) < 2.2);
-}
-
-const screenPopup = document.createElement("div");
-screenPopup.id = "screenPopup";
-screenPopup.innerHTML = `<span></span><button class="btn small primary">Écran</button><button class="btn small">Non</button>`;
-document.querySelector("#canvasWrap").appendChild(screenPopup);
-let pendingScreen = null;
-
-function offerScreen(sId, dId, clientX, clientY) {
-  pendingScreen = { s: sId, d: dId };
-  screenPopup.querySelector("span").textContent = "Écran de " + sId[1] + " sur D" + dId[1] + " ?";
-  const wrap = document.querySelector("#canvasWrap").getBoundingClientRect();
-  screenPopup.style.left = clamp(clientX - wrap.left + 12, 8, wrap.width - 190) + "px";
-  screenPopup.style.top = clamp(clientY - wrap.top - 46, 8, wrap.height - 50) + "px";
-  screenPopup.classList.add("show");
-}
-function hideScreenPopup() { screenPopup.classList.remove("show"); pendingScreen = null; }
-
-screenPopup.querySelector(".primary").addEventListener("click", () => {
-  if (!pendingScreen) return;
-  const phase = state.phases[sel];
-  pushUndo();
-  phase.screens = (phase.screens || []).filter((sc) => sc.d !== pendingScreen.d);
-  phase.screens.push(pendingScreen);
-  toast("Écran de " + pendingScreen.s[1] + " sur D" + pendingScreen.d[1] + " (clique sur le T pour le retirer)");
-  hideScreenPopup();
-  renderPhaseList(); save();
-});
-screenPopup.querySelector(".btn:not(.primary)").addEventListener("click", hideScreenPopup);
-
-/* ---------- Position du ballon ---------- */
-
-function nearestHoop(p) {
-  if (state.courtMode === "half") return HOOP_L;
-  return dist(p, HOOP_L) < dist(p, HOOP_R) ? HOOP_L : HOOP_R;
-}
-
-function heldBallPos(playerPos) {
-  return { x: playerPos.x + BALL_OFF.x, y: playerPos.y + BALL_OFF.y };
-}
-
-// position du ballon pour une phase statique
-function staticBallPos(phase) {
-  if (phase.ball === "shot") {
-    // dernier porteur connu -> panier le plus proche
-    return nearestHoop(lastHolderPos(phase));
-  }
-  return heldBallPos(phase.pos[phase.ball]);
-}
-
-function lastHolderPos(phase) {
-  const i = state.phases.indexOf(phase);
-  for (let k = i; k >= 0; k--) {
-    const b = state.phases[k].ball;
-    if (b !== "shot") return phase.pos[b];
-  }
-  return phase.pos.a1;
-}
-
-/* ---------- Moteur de lecture ---------- */
-
-function totalDuration() {
-  let d = START_HOLD + END_HOLD;
-  for (let i = 1; i < state.phases.length; i++) d += state.phases[i].duration;
-  return d;
-}
-
-// état interpolé à l'instant t (secondes)
-function sampleAt(t) {
-  const ph = state.phases;
-  const out = { pos: {}, ball: null, ballScale: 1, label: ph[0].name, phaseIdx: 0, screens: [] };
-  const screensOf = (phase, alpha) => visibleScreens(phase).map((sc) => ({
-    sPos: out.pos[sc.s], dPos: out.pos[sc.d], alpha,
-  }));
-
-  if (ph.length === 1 || t <= START_HOLD) {
-    const A = ph[0];
-    ALL_IDS.forEach((id) => (out.pos[id] = { ...A.pos[id] }));
-    out.ball = staticBallPos(A);
-    out.label = A.name;
-    out.screens = screensOf(A, 1);
-    return out;
-  }
-
-  let acc = START_HOLD;
-  for (let i = 1; i < ph.length; i++) {
-    const dur = ph[i].duration;
-    if (t < acc + dur || i === ph.length - 1 && t >= acc) {
-      const local = clamp((t - acc) / dur, 0, 1);
-      const e = ease(local);
-      const A = ph[i - 1], B = ph[i];
-      ALL_IDS.forEach((id) => {
-        out.pos[id] = posAlong(A, B, id, e);
-      });
-      out.ball = ballDuring(A, B, e, out.pos, local, dur);
-      out.ballScale = out._bs || 1;
-      out.label = B.name;
-      out.phaseIdx = i;
-      out.screens = screensOf(B, Math.min(1, e * 2));   // fondu à l'approche
-      return out;
-    }
-    acc += dur;
-  }
-  // fin
-  const Z = ph[ph.length - 1];
-  ALL_IDS.forEach((id) => (out.pos[id] = { ...Z.pos[id] }));
-  out.ball = staticBallPos(Z);
-  out.label = Z.name;
-  out.phaseIdx = ph.length - 1;
-  out.screens = screensOf(Z, 1);
-  return out;
-
-  function ballDuring(A, B, e, pos, local, dur) {
-    const arc = (from, to, amp) => {
-      const p = { x: lerp(from.x, to.x, e), y: lerp(from.y, to.y, e) };
-      const d = dist(from, to);
-      if (d > 0.5) {
-        const nx = -(to.y - from.y) / d, ny = (to.x - from.x) / d;
-        const a = Math.sin(Math.PI * e) * amp;
-        p.x += nx * a; p.y += ny * a;
-      }
-      return p;
-    };
-    if (A.ball !== "shot" && B.ball === "shot") {
-      // tir : du porteur vers le panier
-      const from = heldBallPos(pos[A.ball]);
-      const target = nearestHoop(B.pos[A.ball]);
-      out._bs = 1 - 0.25 * Math.sin(Math.PI * e);
-      return arc(from, target, 0.55);
-    }
-    if (A.ball === "shot" && B.ball !== "shot") {
-      // rebond / remise en jeu
-      return arc(nearestHoop(B.pos[B.ball]), heldBallPos(pos[B.ball]), 0.3);
-    }
-    if (A.ball === "shot" && B.ball === "shot") {
-      return nearestHoop(lastHolderPos(B));
-    }
-    if (A.ball !== B.ball) {
-      // passe : trajectoire entre les deux joueurs en mouvement
-      return arc(heldBallPos(pos[A.ball]), heldBallPos(pos[B.ball]), 0.5);
-    }
-    // dribble : le ballon rebondit pendant le déplacement du porteur
-    const h = A.ball;
-    if (tokenMoving(A, B, h)) {
-      const bounces = Math.max(2, Math.round(dur * 2.4));
-      out._bs = 0.66 + 0.34 * Math.abs(Math.sin(Math.PI * bounces * local));
-    }
-    return heldBallPos(pos[h]);
-  }
-}
-
-/* ---------- Rendu principal ---------- */
-
-let dragging = null;   // { id: 'a1'|'ball'|'via', ... }
-let dragBallPos = null;
-let exportMode = false;   // masque les poignées d'édition sur les rendus exportés
-
-function render() {
-  computeView();
-  drawCourt();
-
-  if (playing || scrubbing) {
-    const s = sampleAt(playT);
-    visibleIds().forEach((id) => drawToken(id, s.pos[id]));
-    (s.screens || []).forEach((sc) => drawScreen(sc.sPos, sc.dPos, sc.alpha));
-    if (s.ball) drawBall(s.ball, 1, s.ballScale || 1);
-    drawOverlayText(s.label, true);
-  } else {
-    const phase = state.phases[sel];
-    const prev = sel > 0 ? state.phases[sel - 1] : null;
-
-    // fantômes + flèches de déplacement (courbes si points de passage)
-    if (prev) {
-      visibleIds().forEach((id) => {
-        if (tokenMoving(prev, phase, id)) {
-          drawToken(id, prev.pos[id], 0.22);
-          drawPathArrow(pathPoints(prev, phase, id),
-            id[0] === "a" ? COLORS.attacker : COLORS.defender, false, 0.55);
-        }
-      });
-      // flèche de passe / tir (pointillés)
-      if (prev.ball !== phase.ball) {
-        if (phase.ball === "shot" && prev.ball !== "shot") {
-          drawArrow(phase.pos[prev.ball], nearestHoop(phase.pos[prev.ball]), COLORS.ball, true);
-        } else if (prev.ball !== "shot" && phase.ball !== "shot") {
-          drawArrow(phase.pos[prev.ball], phase.pos[phase.ball], COLORS.ball, true);
-        } else if (prev.ball === "shot" && phase.ball !== "shot") {
-          drawArrow(nearestHoop(phase.pos[phase.ball]), phase.pos[phase.ball], COLORS.ball, true);
-        }
-      }
-    }
-
-    visibleIds().forEach((id) => {
-      if (dragging && dragging.id === id) return;
-      drawToken(id, phase.pos[id]);
-    });
-    if (dragging && dragging.id !== "ball" && dragging.id !== "via") drawToken(dragging.id, phase.pos[dragging.id]);
-
-    visibleScreens(phase).forEach((sc) => drawScreen(phase.pos[sc.s], phase.pos[sc.d]));
-
-    if (prev && !exportMode && (!dragging || dragging.id === "via")) drawHandles(prev, phase);
-
-    if (dragging && dragging.id === "ball" && dragBallPos) drawBall(dragBallPos, 0.9, 1.15);
-    else drawBall(staticBallPos(phase));
-
-    drawOverlayText(phase.name, false);
-  }
-
-  drawTitle();
-}
-
-function drawOverlayText(label, isPlayback) {
-  if (!label) return;
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const fs = Math.max(14, cv.height * 0.032);
-  ctx.font = `600 ${fs}px -apple-system, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "bottom";
-  const x = cv.width / 2, y = cv.height - fs * 0.6;
-  const w = ctx.measureText(label).width + fs * 1.6;
-  ctx.fillStyle = "rgba(15,23,42,.72)";
-  roundRect(x - w / 2, y - fs * 1.55, w, fs * 1.9, fs * 0.5);
-  ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.fillText(label, x, y);
-}
-
-function drawTitle() {
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const fs = Math.max(13, cv.height * 0.028);
-  ctx.font = `700 ${fs}px -apple-system, sans-serif`;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "rgba(60,36,10,.85)";
-  ctx.fillText(state.title, fs * 0.8, fs * 0.7);
-}
-
-function roundRect(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
-/* ---------- Boucle d'animation ---------- */
-
-let lastFrame = performance.now();
-let scrubbing = false;
-
-function frame(now) {
-  const dt = (now - lastFrame) / 1000;
-  lastFrame = now;
-  if (playing) {
-    playT += dt * speed;
-    const total = totalDuration();
-    if (playT >= total) {
-      playT = total;
-      setPlaying(false);
-      scrubbing = true; // garder la dernière frame affichée
-      if (recording) stopRecording();
-    }
-    updateScrubUI();
-  }
-  render();
-  requestAnimationFrame(frame);
-}
-
-function setPlaying(v) {
-  playing = v;
-  $("#playBtn").textContent = v ? "⏸" : "▶";
-  if (v) {
-    scrubbing = false;
-    if (playT >= totalDuration() - 0.01) playT = 0;
-  } else if (playT > 0.01) {
-    scrubbing = true; // pause : figer la frame courante
-  }
-}
-
-function updateScrubUI() {
-  const total = totalDuration();
-  $("#scrub").value = Math.round((playT / total) * 1000);
-  $("#timeLabel").textContent = playT.toFixed(1) + " / " + total.toFixed(1) + " s";
-}
-
-/* ---------- Interactions souris / tactile ---------- */
-
-function pointerPos(ev) {
-  const r = cv.getBoundingClientRect();
-  const dpr = cv.width / r.width;
-  return { px: (ev.clientX - r.left) * dpr, py: (ev.clientY - r.top) * dpr };
-}
-
-cv.addEventListener("pointerdown", (ev) => {
-  if (playing || recording) return;
-  if (scrubbing) { scrubbing = false; return; } // 1er clic : retour à la vue édition
-  hideScreenPopup();
-  const { px, py } = pointerPos(ev);
-  const c = s2c(px, py);
-  const phase = state.phases[sel];
-
-  // clic sur la barre d'un écran -> suppression
-  for (const sc of visibleScreens(phase)) {
-    if (dist(c, screenBarCenter(phase, sc)) < 0.35) {
-      pushUndo();
-      phase.screens = phase.screens.filter((x) => x !== sc);
-      toast("Écran retiré.");
-      renderPhaseList(); save();
-      return;
-    }
-  }
-
-  // ballon : saisie directe uniquement si le clic est vraiment dessus
-  const bp = staticBallPos(phase);
-  const grabBall = () => {
-    pushUndo();
-    dragging = { id: "ball" };
-    dragBallPos = { ...c };
-    cv.setPointerCapture(ev.pointerId);
-  };
-  if (dist(c, bp) < R_BALL * 1.35) { grabBall(); return; }
-
-  // poignées de trajectoire (points de passage réels puis virtuels)
-  if (sel > 0) {
-    const prevPh = state.phases[sel - 1];
-    for (const id of visibleIds()) {
-      if (!tokenMoving(prevPh, phase, id)) continue;
-      const via = (phase.via && phase.via[id]) || [];
-      for (let k = 0; k < via.length; k++) {
-        if (dist(c, via[k]) < 0.34) {
-          pushUndo();
-          dragging = { id: "via", token: id, k };
-          cv.setPointerCapture(ev.pointerId);
-          return;
-        }
-      }
-      const pts = pathPoints(prevPh, phase, id);
-      const n = pts.length - 1;
-      for (let k = 0; k < n; k++) {
-        const m = crPoint(pts, (k + 0.5) / n);
-        if (dist(c, m) < 0.3) {
-          pushUndo();
-          if (!phase.via) phase.via = {};
-          if (!phase.via[id]) phase.via[id] = [];
-          phase.via[id].splice(k, 0, { x: m.x, y: m.y });
-          dragging = { id: "via", token: id, k };
-          cv.setPointerCapture(ev.pointerId);
-          return;
-        }
-      }
-    }
-  }
-
-  // joueurs (du dernier dessiné au premier)
-  const ids = visibleIds().slice().reverse();
-  for (const id of ids) {
-    if (dist(c, phase.pos[id]) < R_PLAYER * 1.4) {
-      pushUndo();
-      dragging = { id, dx: phase.pos[id].x - c.x, dy: phase.pos[id].y - c.y };
-      cv.setPointerCapture(ev.pointerId);
-      return;
-    }
-  }
-  // zone de tolérance autour du ballon si aucun joueur touché
-  if (dist(c, bp) < R_BALL * 2.6) grabBall();
-});
-
-cv.addEventListener("pointermove", (ev) => {
-  if (!dragging) return;
-  const { px, py } = pointerPos(ev);
-  const c = s2c(px, py);
-  if (dragging.id === "ball") {
-    dragBallPos = clampToCourt(c);
-  } else if (dragging.id === "via") {
-    state.phases[sel].via[dragging.token][dragging.k] = clampToCourt(c);
-  } else {
-    state.phases[sel].pos[dragging.id] = clampToCourt({ x: c.x + dragging.dx, y: c.y + dragging.dy });
-  }
-});
-
-// double-clic sur un point de passage : suppression
-cv.addEventListener("dblclick", (ev) => {
-  if (playing || sel === 0) return;
-  const { px, py } = pointerPos(ev);
-  const c = s2c(px, py);
-  const phase = state.phases[sel];
-  for (const id of visibleIds()) {
-    const via = (phase.via && phase.via[id]) || [];
-    for (let k = 0; k < via.length; k++) {
-      if (dist(c, via[k]) < 0.34) {
-        pushUndo();
-        via.splice(k, 1);
-        toast("Point de trajectoire supprimé.");
-        save();
-        return;
-      }
-    }
-  }
-});
-
-cv.addEventListener("pointerup", (ev) => {
-  if (!dragging) return;
-  const wasDragging = dragging.id;
-  if (dragging.id === "ball" && dragBallPos) {
-    const phase = state.phases[sel];
-    // lâché sur un panier ?
-    const hoop = nearestHoop(dragBallPos);
-    if (dist(dragBallPos, hoop) < 1.0) {
-      phase.ball = "shot";
-      toast("🏀 Tir au panier sur « " + phase.name + " »");
-    } else {
-      // attaquant le plus proche
-      let best = null, bd = 1.3;
-      ATT_IDS.forEach((id) => {
-        const d = dist(dragBallPos, phase.pos[id]);
-        if (d < bd) { bd = d; best = id; }
-      });
-      if (best) {
-        phase.ball = best;
-        toast("Ballon donné au joueur " + best[1]);
-      }
-    }
-    dragBallPos = null;
-  }
-  dragging = null;
-
-  // écran : attaquant sans ballon lâché sur un défenseur ?
-  const phase = state.phases[sel];
-  cleanupScreens(phase);
-  if (wasDragging[0] === "a" && wasDragging !== phase.ball) {
-    const p = phase.pos[wasDragging];
-    let best = null, bd = 1.15;
-    DEF_IDS.slice(0, state.defenders).forEach((d) => {
-      const dd = dist(p, phase.pos[d]);
-      if (dd < bd) { bd = dd; best = d; }
-    });
-    const already = best && (phase.screens || []).some((sc) => sc.s === wasDragging && sc.d === best);
-    if (best && !already) offerScreen(wasDragging, best, ev.clientX, ev.clientY);
-  }
-
-  renderPhaseList();
-  save();
-});
-
-/* ---------- UI : phases ---------- */
-
-function renderPhaseList() {
-  const list = $("#phaseList");
-  list.innerHTML = "";
-  state.phases.forEach((ph, i) => {
-    const div = document.createElement("div");
-    div.className = "phase-item" + (i === sel ? " selected" : "");
-
-    const ballTxt = ph.ball === "shot" ? "🏀→🧺 tir" : "🏀 J" + ph.ball[1];
-    const scrTxt = (ph.screens || []).length
-      ? `<span class="scr-tag">T ${ph.screens.map((sc) => sc.s[1] + "▸D" + sc.d[1]).join(" ")}</span>`
-      : "";
-    div.innerHTML = `
-      <div class="top">
-        <span class="num">${i + 1}</span>
-        <input class="pname" value="${escapeHtml(ph.name)}" spellcheck="false">
-        ${scrTxt}
-        <span class="ball-tag">${ballTxt}</span>
-      </div>
-      <div class="bottom">
-        ${i > 0 ? `<label>durée</label><input type="number" class="pdur" min="0.25" step="0.25" value="${ph.duration}"><span>s</span>` : `<span style="font-size:11px">position initiale</span>`}
-        <span class="icons">
-          <button class="icon-btn pup" title="Monter">▲</button>
-          <button class="icon-btn pdown" title="Descendre">▼</button>
-          <button class="icon-btn pdup" title="Dupliquer">⧉</button>
-          <button class="icon-btn pdel" title="Supprimer">✕</button>
-        </span>
-      </div>`;
-
-    div.addEventListener("click", (e) => {
-      if (e.target.closest("input,button")) return;
-      sel = i; scrubbing = false; renderPhaseList();
-    });
-    div.querySelector(".pname").addEventListener("change", (e) => {
-      pushUndo(); ph.name = e.target.value; save();
-    });
-    div.querySelector(".pname").addEventListener("focus", () => { sel = i; renderPhaseListSelectionOnly(); });
-    const dur = div.querySelector(".pdur");
-    if (dur) dur.addEventListener("change", (e) => {
-      pushUndo(); ph.duration = Math.max(0.25, parseFloat(e.target.value) || 1.5); save(); updateScrubUI();
-    });
-    div.querySelector(".pup").addEventListener("click", () => movePhase(i, -1));
-    div.querySelector(".pdown").addEventListener("click", () => movePhase(i, 1));
-    div.querySelector(".pdup").addEventListener("click", () => duplicatePhase(i));
-    div.querySelector(".pdel").addEventListener("click", () => deletePhase(i));
-
-    list.appendChild(div);
-  });
-  updateScrubUI();
-}
-
-function renderPhaseListSelectionOnly() {
-  document.querySelectorAll(".phase-item").forEach((el, i) =>
-    el.classList.toggle("selected", i === sel));
-}
-
-function escapeHtml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-}
-
-function addPhase() {
-  pushUndo();
-  const last = state.phases[state.phases.length - 1];
-  const ph = makePhase(last, state.phases.length + 1);
-  if (last.ball === "shot") ph.ball = "a1";
-  state.phases.push(ph);
-  sel = state.phases.length - 1;
-  renderPhaseList(); save();
-}
-
-function duplicatePhase(i) {
-  pushUndo();
-  const copy = JSON.parse(JSON.stringify(state.phases[i]));
-  copy.name += " (copie)";
-  state.phases.splice(i + 1, 0, copy);
-  sel = i + 1;
-  renderPhaseList(); save();
-}
-
-function deletePhase(i) {
-  if (state.phases.length === 1) { toast("Impossible : il faut au moins une phase."); return; }
-  pushUndo();
-  state.phases.splice(i, 1);
-  sel = clamp(sel, 0, state.phases.length - 1);
-  renderPhaseList(); save();
-}
-
-function movePhase(i, dir) {
-  const j = i + dir;
-  if (j < 0 || j >= state.phases.length) return;
-  pushUndo();
-  const [ph] = state.phases.splice(i, 1);
-  state.phases.splice(j, 0, ph);
-  sel = j;
-  renderPhaseList(); save();
-}
-
-/* ---------- UI : contrôles ---------- */
-
-function syncUI() {
-  $("#titleInput").value = state.title;
-  $("#defCount").value = state.defenders;
-  $("#situationSel").value = state.situation || "defaut";
-  document.querySelectorAll("#courtSeg button").forEach((b) =>
-    b.classList.toggle("active", b.dataset.mode === state.courtMode));
-  renderPhaseList();
-}
-
-$("#titleInput").addEventListener("change", (e) => { state.title = e.target.value; save(); });
-
-document.querySelectorAll("#courtSeg button").forEach((b) => {
-  b.addEventListener("click", () => {
-    pushUndo();
-    state.courtMode = b.dataset.mode;
-    if (state.courtMode === "half") {
-      // ramener les positions dans le demi-terrain
-      state.phases.forEach((ph) => {
-        ALL_IDS.forEach((id) => { ph.pos[id] = clampToCourt(ph.pos[id]); });
-        if (ph.via) Object.values(ph.via).forEach((arr) =>
-          arr.forEach((v, i) => { arr[i] = clampToCourt(v); }));
-      });
-    }
-    syncUI(); save();
-  });
-});
-
-$("#situationSel").addEventListener("change", (e) => applySituation(e.target.value));
-
-$("#defCount").addEventListener("change", (e) => {
-  pushUndo();
-  state.defenders = parseInt(e.target.value);
-  save();
-});
-
-$("#autoDefBtn").addEventListener("click", () => {
-  pushUndo();
-  const ph = state.phases[sel];
-  for (let i = 0; i < state.defenders; i++) {
-    const a = ph.pos[ATT_IDS[i]];
-    const hoop = nearestHoop(a);
-    const v = { x: hoop.x - a.x, y: hoop.y - a.y };
-    const n = Math.hypot(v.x, v.y) || 1;
-    ph.pos[DEF_IDS[i]] = clampToCourt({ x: a.x + v.x / n * 1.4, y: a.y + v.y / n * 1.4 });
-  }
-  save();
-  toast("Défenseurs placés sur la phase " + (sel + 1));
-});
-
-$("#addPhaseBtn").addEventListener("click", addPhase);
-
-$("#playBtn").addEventListener("click", () => setPlaying(!playing));
-$("#stopBtn").addEventListener("click", () => { setPlaying(false); playT = 0; scrubbing = false; updateScrubUI(); });
-$("#speedSel").addEventListener("change", (e) => { speed = parseFloat(e.target.value); });
-
-$("#scrub").addEventListener("input", (e) => {
-  playT = (parseInt(e.target.value) / 1000) * totalDuration();
-  scrubbing = true;
-  setPlaying(false);
-  updateScrubUI();
-});
-
-$("#newBtn").addEventListener("click", () => {
-  showModal(
-    "Nouveau système",
-    "Le système actuel sera remplacé. Pense à l'exporter en JSON si tu veux le conserver.",
-    [
-      { label: "Annuler" },
-      { label: "Exporter puis créer", action: () => { $("#exportBtn").click(); setTimeout(resetState, 400); } },
-      { label: "Créer", primary: true, action: resetState },
-    ]
-  );
-});
-
-function resetState() {
-  state = defaultState();
-  sel = 0; playT = 0; undoStack = [];
-  syncUI(); save();
-}
-
-$("#menuBtn").addEventListener("click", (e) => {
-  e.stopPropagation();
-  $("#menuList").classList.toggle("show");
-});
-$("#menuList").addEventListener("click", () => $("#menuList").classList.remove("show"));
-window.addEventListener("click", (e) => {
-  if (!e.target.closest("#menuWrap")) $("#menuList").classList.remove("show");
-});
-$("#modalOverlay").addEventListener("click", (e) => {
-  if (e.target.id === "modalOverlay") e.target.classList.remove("show");
-});
-
-/* ---------- Import / export JSON ---------- */
-
-$("#exportBtn").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-  downloadBlob(blob, slug(state.title) + ".json");
-  toast("Système exporté en JSON.");
-});
-
-$("#importBtn").addEventListener("click", () => $("#fileInput").click());
-$("#fileInput").addEventListener("change", (e) => {
-  const f = e.target.files[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result);
-      if (data.app !== "basketballcoach-web" || !Array.isArray(data.phases)) {
-        toast("Fichier non reconnu (exporte depuis cette application)."); return;
-      }
-      pushUndo();
-      state = data;
-      normalizePhases();
-      sel = 0; playT = 0;
-      syncUI(); save();
-      toast("Système « " + state.title + " » importé.");
-    } catch (err) {
-      toast("Erreur de lecture du fichier JSON.");
-    }
-  };
-  reader.readAsText(f);
-  e.target.value = "";
-});
-
-function slug(s) {
-  return (s || "systeme").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "systeme";
-}
-
-function downloadBlob(blob, name) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-}
-
-/* ---------- Export images (une par phase) ---------- */
-
-$("#imgBtn").addEventListener("click", async () => {
-  if (playing || recording) return;
-  const prevSel = sel;
-  setPlaying(false); scrubbing = false;
-  hideScreenPopup();
-  const base = slug(state.title);
-  exportMode = true;
-  for (let i = 0; i < state.phases.length; i++) {
-    sel = i;
-    render();   // vue édition : positions + flèches + écrans de la phase i
-    const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
-    downloadBlob(blob, base + "-phase-" + String(i + 1).padStart(2, "0") + ".png");
-    await new Promise((r) => setTimeout(r, 350));
-  }
-  exportMode = false;
-  sel = prevSel;
-  renderPhaseListSelectionOnly();
-  toast(state.phases.length + " image(s) exportée(s) — une par phase.");
-});
-
-/* ---------- Planche imprimable / PDF ---------- */
-
-$("#boardBtn").addEventListener("click", () => {
-  if (playing || recording) return;
-  setPlaying(false); scrubbing = false;
-  hideScreenPopup();
-  const prevSel = sel;
-  const cells = [];
-  exportMode = true;
-  for (let i = 0; i < state.phases.length; i++) {
-    sel = i;
-    render();
-    cells.push({
-      url: cv.toDataURL("image/png"),
-      name: state.phases[i].name,
-      ball: state.phases[i].ball === "shot" ? "tir au panier" : "ballon : joueur " + state.phases[i].ball[1],
-    });
-  }
-  exportMode = false;
-  sel = prevSel;
-  render();
-  const w = window.open("", "_blank");
-  if (!w) { toast("Autorise les fenêtres popup pour générer la planche."); return; }
-  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
-<title>${esc(state.title)} — planche</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #111; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  .sub { color: #666; font-size: 12px; margin-bottom: 16px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  figure { margin: 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
-  img { width: 100%; display: block; }
-  figcaption { padding: 6px 10px; font-size: 12px; color: #444; border-top: 1px solid #eee; }
-  figcaption b { font-size: 13px; color: #111; }
-  .hintbar { position: fixed; top: 8px; right: 8px; font-size: 12px; background: #eef2ff; border: 1px solid #c7d2fe; padding: 6px 10px; border-radius: 6px; }
-  @page { margin: 12mm; }
-  @media print { .hintbar { display: none; } body { margin: 0; } }
-</style></head><body>
-<div class="hintbar">Imprimer ou enregistrer en PDF : Cmd/Ctrl + P</div>
-<h1>${esc(state.title)}</h1>
-<div class="sub">${cells.length} phase(s) — BasketballCoach</div>
-<div class="grid">
-${cells.map((c, i) => `<figure><img src="${c.url}"><figcaption><b>${i + 1}. ${esc(c.name)}</b> — ${c.ball}</figcaption></figure>`).join("\n")}
-</div>
-<scr` + `ipt>window.onload = () => setTimeout(() => window.print(), 400);</scr` + `ipt>
-</body></html>`);
-  w.document.close();
-});
-
-/* ---------- Export vidéo ---------- */
-
-let recorder = null, chunks = [];
-
-$("#videoBtn").addEventListener("click", () => {
-  if (recording) return;
-  if (state.phases.length < 2) { toast("Ajoute au moins une deuxième phase avant d'exporter."); return; }
-  const stream = cv.captureStream(60);
-  const mime = ["video/mp4;codecs=avc1", "video/webm;codecs=vp9", "video/webm"]
-    .find((m) => MediaRecorder.isTypeSupported(m));
-  if (!mime) { toast("Ton navigateur ne permet pas l'enregistrement vidéo."); return; }
-  chunks = [];
-  recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
-  recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
-  recorder.onstop = () => {
-    const ext = mime.startsWith("video/mp4") ? "mp4" : "webm";
-    downloadBlob(new Blob(chunks, { type: mime }), slug(state.title) + "." + ext);
-    toast("Vidéo exportée (" + ext + ") 🎥");
-  };
-  recording = true;
-  $("#recBadge").style.display = "inline-block";
-  $("#videoBtn").disabled = true;
-  playT = 0;
-  recorder.start();
-  setPlaying(true);
-});
-
-function stopRecording() {
-  recording = false;
-  $("#recBadge").style.display = "none";
-  $("#videoBtn").disabled = false;
-  // petite marge pour capter la dernière frame
-  setTimeout(() => { if (recorder && recorder.state !== "inactive") recorder.stop(); }, 300);
-}
-
-/* ---------- Clavier ---------- */
-
-window.addEventListener("keydown", (e) => {
-  if (e.target.matches("input, select, textarea")) return;
-  if (e.code === "Space") { e.preventDefault(); setPlaying(!playing); }
-  else if (e.key === "ArrowRight") { sel = clamp(sel + 1, 0, state.phases.length - 1); scrubbing = false; renderPhaseListSelectionOnly(); }
-  else if (e.key === "ArrowLeft") { sel = clamp(sel - 1, 0, state.phases.length - 1); scrubbing = false; renderPhaseListSelectionOnly(); }
-  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
-});
-
-/* ---------- Démarrage ---------- */
-
-(function init() {
-  try {
-    const saved = localStorage.getItem("bballcoach");
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.app === "basketballcoach-web" && Array.isArray(data.phases) && data.phases.length) {
-        state = data;
-        normalizePhases();
-      }
-    }
-  } catch (e) {}
+  addEventListener("resize", resize);
   resize();
-  syncUI();
-  updateScrubUI();
+
+  // demi-terrain en unités [0..15] x [0..14], panier en haut
+  const HOOP = { x: 7.5, y: 1.575 };
+  // phases d'un pick and roll classique (positions {x(0-15), y(0-14)})
+  const K = [
+    { p: [{x:7.5,y:9.2},{x:12.6,y:7.2},{x:2.4,y:7.2},{x:10.3,y:2.4},{x:5.6,y:4.9}], ball: 0 },
+    { p: [{x:8.3,y:8.6},{x:13.2,y:8.6},{x:2.2,y:8.4},{x:10.3,y:2.4},{x:8.6,y:7.4}], ball: 0 },
+    { p: [{x:6.2,y:5.4},{x:13.2,y:8.6},{x:2.2,y:8.4},{x:10.3,y:2.4},{x:9.6,y:3.6}], ball: 0 },
+    { p: [{x:6.2,y:5.4},{x:13.2,y:8.6},{x:2.2,y:8.4},{x:10.3,y:2.4},{x:9.6,y:3.6}], ball: 4 },
+    { p: [{x:6.6,y:6.4},{x:13.4,y:9.2},{x:2.0,y:9.0},{x:11.2,y:3.2},{x:8.2,y:2.2}], ball: "shot" },
+    { p: [{x:7.5,y:9.2},{x:12.6,y:7.2},{x:2.4,y:7.2},{x:10.3,y:2.4},{x:5.6,y:4.9}], ball: 0 },
+  ];
+  const DUR = 1.8, HOLD = 0.55;
+  const ease = (t) => t * t * (3 - 2 * t);
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  function courtTransform() {
+    // demi-terrain décalé à droite sur écran large pour laisser respirer le titre
+    const s = Math.min(cv.width / 22, cv.height / 17);
+    const cx = cv.width > 1000 * dpr ? cv.width * 0.62 : cv.width / 2;
+    const ox = cx - 7.5 * s;
+    const oy = cv.height * 0.08;
+    return { s, ox, oy };
+  }
+  const P = (t, x, y) => [t.ox + x * t.s, t.oy + y * t.s];
+
+  function drawCourt(t) {
+    ctx.strokeStyle = "rgba(255,255,255,.16)";
+    ctx.lineWidth = Math.max(1, t.s * 0.045);
+    const r = (x, y, w, h) => { const [a, b] = P(t, x, y); ctx.strokeRect(a, b, w * t.s, h * t.s); };
+    r(0, 0, 15, 14);
+    r(5.05, 0, 4.9, 5.8);
+    ctx.beginPath();
+    const [fx, fy] = P(t, 7.5, 5.8);
+    ctx.arc(fx, fy, 1.8 * t.s, 0, Math.PI * 2);
+    ctx.stroke();
+    // arc 3 points
+    ctx.beginPath();
+    const [hx, hy] = P(t, HOOP.x, HOOP.y);
+    ctx.arc(hx, hy, 6.75 * t.s, 0.21, Math.PI - 0.21);
+    ctx.stroke();
+    // panier
+    ctx.beginPath();
+    ctx.arc(hx, hy, 0.225 * t.s, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(249,115,22,.8)";
+    ctx.stroke();
+    const [bx1, by1] = P(t, 6.6, 1.2), [bx2, by2] = P(t, 8.4, 1.2);
+    ctx.beginPath(); ctx.moveTo(bx1, by1); ctx.lineTo(bx2, by2);
+    ctx.strokeStyle = "rgba(255,255,255,.3)";
+    ctx.stroke();
+  }
+
+  let t0 = performance.now();
+  function frame(now) {
+    const total = (K.length - 1) * DUR + HOLD;
+    let tt = (((now - t0) / 1000) % total + total) % total;
+    let seg = Math.min(K.length - 2, Math.floor(tt / DUR));
+    let local = Math.min(1, tt / DUR - seg);
+    const e = ease(local);
+    const A = K[seg], B = K[seg + 1];
+
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const tr = courtTransform();
+    drawCourt(tr);
+
+    const pos = A.p.map((pa, i) => ({
+      x: lerp(pa.x, B.p[i].x, e),
+      y: lerp(pa.y, B.p[i].y, e),
+    }));
+
+    // joueurs
+    pos.forEach((p, i) => {
+      const [x, y] = P(tr, p.x, p.y);
+      const r = 0.42 * tr.s;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.fill();
+      ctx.fillStyle = "#000";
+      ctx.font = `700 ${r * 1.1}px "Arial Narrow", Arial`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(i + 1, x, y + r * 0.06);
+    });
+
+    // ballon
+    let bp;
+    let scale = 1;
+    if (A.ball === B.ball && typeof A.ball === "number") {
+      bp = pos[A.ball];
+      const d = Math.hypot(A.p[A.ball].x - B.p[A.ball].x, A.p[A.ball].y - B.p[A.ball].y);
+      if (d > 0.8) scale = 0.7 + 0.3 * Math.abs(Math.sin(Math.PI * 4 * local));
+    } else if (typeof A.ball === "number" && typeof B.ball === "number") {
+      bp = { x: lerp(pos[A.ball].x, pos[B.ball].x, e), y: lerp(pos[A.ball].y, pos[B.ball].y, e) };
+    } else if (B.ball === "shot") {
+      bp = { x: lerp(pos[A.ball].x, HOOP.x, e), y: lerp(pos[A.ball].y, HOOP.y, e) };
+      scale = 1 - 0.3 * Math.sin(Math.PI * e);
+    } else {
+      bp = { x: lerp(HOOP.x, pos[B.ball].x, e), y: lerp(HOOP.y, pos[B.ball].y, e) };
+    }
+    const [bx, by] = P(tr, bp.x + 0.45, bp.y - 0.3);
+    ctx.beginPath();
+    ctx.arc(bx, by, 0.24 * tr.s * scale, 0, Math.PI * 2);
+    ctx.fillStyle = "#f97316";
+    ctx.fill();
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ===== Bande lecture : mini animation ===== */
+(function playAnim() {
+  const cv = document.getElementById("playCanvas");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = (t) => t * t * (3 - 2 * t);
+  // passe et va simple
+  const K = [
+    { a: { x: 230, y: 330 }, b: { x: 370, y: 260 }, ball: "a" },
+    { a: { x: 230, y: 330 }, b: { x: 370, y: 260 }, ball: "b" },
+    { a: { x: 250, y: 120 }, b: { x: 370, y: 260 }, ball: "b" },
+    { a: { x: 250, y: 120 }, b: { x: 370, y: 260 }, ball: "a" },
+    { a: { x: 230, y: 330 }, b: { x: 370, y: 260 }, ball: "a" },
+  ];
+  const DUR = 1.4;
+  let t0 = performance.now();
+  function frame(now) {
+    const total = (K.length - 1) * DUR + 0.5;
+    let tt = (((now - t0) / 1000) % total + total) % total;
+    let seg = Math.min(K.length - 2, Math.floor(tt / DUR));
+    const e = ease(Math.min(1, tt / DUR - seg));
+    const A = K[seg], B = K[seg + 1];
+    ctx.clearRect(0, 0, W, H);
+    // terrain
+    ctx.strokeStyle = "rgba(255,255,255,.3)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(30, 20, 400, 360);
+    ctx.strokeRect(150, 20, 160, 150);
+    ctx.beginPath(); ctx.arc(230, 170, 46, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(200, 50); ctx.lineTo(260, 50); ctx.lineWidth = 3; ctx.stroke();
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(230, 62, 8, 0, Math.PI * 2); ctx.strokeStyle = "rgba(249,115,22,.9)"; ctx.stroke();
+
+    const pa = { x: lerp(A.a.x, B.a.x, e), y: lerp(A.a.y, B.a.y, e) };
+    const pb = { x: lerp(A.b.x, B.b.x, e), y: lerp(A.b.y, B.b.y, e) };
+    const drawP = (p, n) => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+      ctx.fillStyle = "#15803d"; ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.stroke();
+      ctx.fillStyle = "#fff"; ctx.font = "700 15px 'Arial Narrow', Arial";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(n, p.x, p.y + 1);
+    };
+    drawP(pa, "1"); drawP(pb, "2");
+    let bp;
+    if (A.ball === B.ball) bp = A.ball === "a" ? pa : pb;
+    else {
+      const from = A.ball === "a" ? pa : pb, to = B.ball === "a" ? pa : pb;
+      bp = { x: lerp(from.x, to.x, e), y: lerp(from.y, to.y, e) };
+    }
+    ctx.beginPath(); ctx.arc(bp.x + 17, bp.y - 12, 8, 0, Math.PI * 2);
+    ctx.fillStyle = "#f97316"; ctx.fill();
+    requestAnimationFrame(frame);
+  }
   requestAnimationFrame(frame);
 })();
 </script>
