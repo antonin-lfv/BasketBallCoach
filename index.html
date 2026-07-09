@@ -287,14 +287,60 @@
   .mega .lead { margin: 16px auto 34px; color: #b8c2d4; }
 
   footer {
-    padding: 30px 28px 44px;
-    text-align: center;
+    border-top: 1px solid rgba(138, 90, 43, .14);
+    padding: 36px 28px 46px;
     color: var(--muted);
     font-size: 14.5px;
     font-weight: 600;
   }
+  footer .cols {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 40px;
+    align-items: center;
+    justify-content: space-between;
+  }
   footer a { color: var(--orange-dark); font-weight: 800; text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+  footer .legal-links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+  footer .legal-links a { color: var(--muted); font-weight: 700; }
+  footer .legal-links a:hover { color: var(--orange-dark); }
+
+  /* ===== Modales légales ===== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(38, 23, 10, .45);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .legal-box {
+    background: #fffdf8;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    max-width: 620px;
+    width: 100%;
+    max-height: 82vh;
+    overflow-y: auto;
+    padding: 36px 38px;
+  }
+  .legal-box h3 { font-weight: 900; font-size: 24px; margin-bottom: 16px; }
+  .legal-box h4 { font-weight: 800; font-size: 16px; margin: 18px 0 6px; }
+  .legal-box p { color: var(--muted); font-size: 15px; margin-bottom: 8px; }
+  .legal-box a { color: var(--orange-dark); font-weight: 700; }
+  .legal-box .close {
+    margin-top: 22px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
 
   /* reveal */
   .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
@@ -436,11 +482,65 @@
 </section>
 
 <footer>
-  BasketballCoach — créé pour les entraîneurs. <a href="app.html">Ouvrir l'application</a>
+  <div class="cols">
+    <div>
+      🏀 <b>BasketballCoach</b> — créé par <a href="https://github.com/antonin-lfv" target="_blank" rel="noopener">Antonin Lefevre</a>
+    </div>
+    <div class="legal-links">
+      <a href="app.html">Application</a>
+      <a href="https://github.com/antonin-lfv" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:antoninlefevre45@gmail.com">Contact</a>
+      <a href="#" data-legal="mentions">Mentions légales</a>
+      <a href="#" data-legal="confidentialite">Confidentialité</a>
+    </div>
+  </div>
 </footer>
+
+<div class="overlay" id="legal-mentions">
+  <div class="legal-box">
+    <h3>Mentions légales</h3>
+    <h4>Éditeur</h4>
+    <p>BasketballCoach est un projet personnel édité par Antonin Lefevre.<br>
+    Contact : <a href="mailto:antoninlefevre45@gmail.com">antoninlefevre45@gmail.com</a> · <a href="https://github.com/antonin-lfv" target="_blank" rel="noopener">github.com/antonin-lfv</a></p>
+    <h4>Hébergement</h4>
+    <p>Ce site est un site statique. Il peut être hébergé sur GitHub Pages (GitHub, Inc., 88 Colin P. Kelly Jr. St, San Francisco, CA 94107, USA) ou ouvert localement sans aucun serveur.</p>
+    <h4>Propriété intellectuelle</h4>
+    <p>L'application, son code et ses contenus sont la propriété de leur auteur. Les systèmes de jeu que vous créez vous appartiennent entièrement.</p>
+    <h4>Responsabilité</h4>
+    <p>L'application est fournie « en l'état », sans garantie d'aucune sorte. L'auteur ne saurait être tenu responsable d'un dommage résultant de son utilisation.</p>
+    <button class="btn close">Fermer</button>
+  </div>
+</div>
+
+<div class="overlay" id="legal-confidentialite">
+  <div class="legal-box">
+    <h3>Politique de confidentialité</h3>
+    <h4>Aucune collecte de données</h4>
+    <p>BasketballCoach ne collecte, ne transmet et ne stocke aucune donnée personnelle sur un serveur. Il n'y a ni compte, ni formulaire, ni outil d'analyse d'audience, ni cookie.</p>
+    <h4>Stockage local</h4>
+    <p>Vos systèmes de jeu sont enregistrés uniquement dans le stockage local de votre navigateur (localStorage), sur votre appareil. Ils ne quittent jamais votre machine, sauf si vous les exportez volontairement (JSON, vidéo, images, PDF).</p>
+    <h4>Polices de caractères</h4>
+    <p>Cette page d'accueil charge la police Nunito depuis Google Fonts, ce qui implique une requête vers les serveurs de Google. L'application elle-même n'effectue aucune requête externe.</p>
+    <h4>Contact</h4>
+    <p>Pour toute question : <a href="mailto:antoninlefevre45@gmail.com">antoninlefevre45@gmail.com</a></p>
+    <button class="btn close">Fermer</button>
+  </div>
+</div>
 
 <script>
 "use strict";
+
+/* ===== Modales légales ===== */
+document.querySelectorAll("[data-legal]").forEach((a) => {
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("legal-" + a.dataset.legal).classList.add("show");
+  });
+});
+document.querySelectorAll(".overlay").forEach((ov) => {
+  ov.addEventListener("click", (e) => { if (e.target === ov) ov.classList.remove("show"); });
+  ov.querySelector(".close").addEventListener("click", () => ov.classList.remove("show"));
+});
 
 /* ===== Reveal au scroll ===== */
 const io = new IntersectionObserver((entries) => {
@@ -497,8 +597,9 @@ function makeCourt(cv) {
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(n, px, py + r * 0.06);
   }
-  function ball(x, y, scale = 1) {
-    const [px, py] = P(x + 0.48, y - 0.32);
+  // held : décalage "dans les mains" seulement si le ballon est porté
+  function ball(x, y, scale = 1, held = true) {
+    const [px, py] = held ? P(x + 0.48, y - 0.32) : P(x, y);
     const r = 0.26 * s * scale;
     ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2);
     ctx.fillStyle = C.ball; ctx.fill();
@@ -524,7 +625,7 @@ function runLoop(cv, K, colors, DUR, HOOP) {
     court.draw();
     const pos = A.p.map((pa, i) => ({ x: lerp(pa.x, B.p[i].x, e), y: lerp(pa.y, B.p[i].y, e) }));
     pos.forEach((p, i) => court.token(p.x, p.y, colors[i].c, colors[i].n));
-    let bp, scale = 1;
+    let bp, scale = 1, held = true;
     if (A.ball === B.ball && typeof A.ball === "number") {
       bp = pos[A.ball];
       const d = Math.hypot(A.p[A.ball].x - B.p[A.ball].x, A.p[A.ball].y - B.p[A.ball].y);
@@ -532,12 +633,15 @@ function runLoop(cv, K, colors, DUR, HOOP) {
     } else if (typeof A.ball === "number" && typeof B.ball === "number") {
       bp = { x: lerp(pos[A.ball].x, pos[B.ball].x, e), y: lerp(pos[A.ball].y, pos[B.ball].y, e) };
     } else if (B.ball === "shot") {
-      bp = { x: lerp(pos[A.ball].x, HOOP.x, e), y: lerp(pos[A.ball].y, HOOP.y, e) };
+      // tir : le ballon termine exactement au cercle
+      bp = { x: lerp(pos[A.ball].x + 0.48, HOOP.x, e), y: lerp(pos[A.ball].y - 0.32, HOOP.y, e) };
       scale = 1 - 0.3 * Math.sin(Math.PI * e);
+      held = false;
     } else {
-      bp = { x: lerp(HOOP.x, pos[B.ball].x, e), y: lerp(HOOP.y, pos[B.ball].y, e) };
+      bp = { x: lerp(HOOP.x, pos[B.ball].x + 0.48, e), y: lerp(HOOP.y, pos[B.ball].y - 0.32, e) };
+      held = false;
     }
-    court.ball(bp.x, bp.y, scale);
+    court.ball(bp.x, bp.y, scale, held);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -613,11 +717,12 @@ const SYSTEM = {"app":"basketballcoach-web","version":1,"title":"Nouveau syst\u0
   }
 
   function sample(t) {
-    const out = { pos: {}, screens: [], ball: null, scale: 1 };
+    const out = { pos: {}, screens: [], ball: null, scale: 1, held: true };
     const stat = (P) => {
       IDS.forEach((id) => (out.pos[id] = P.pos[id]));
       out.screens = (P.screens || []).map((sc) => ({ s: P.pos[sc.s], d: P.pos[sc.d], a: 1 }));
       out.ball = P.ball === "shot" ? HOOP_APP : P.pos[P.ball];
+      out.held = P.ball !== "shot";
     };
     if (t <= START_HOLD) { stat(ph[0]); return out; }
     let acc = START_HOLD;
@@ -632,11 +737,14 @@ const SYSTEM = {"app":"basketballcoach-web","version":1,"title":"Nouveau syst\u0
           s: B.pos[sc.s], d: B.pos[sc.d], a: clamp01((e - 0.65) / 0.3),
         }));
         if (A.ball !== "shot" && B.ball === "shot") {
+          // tir : le ballon termine exactement au cercle
           out.ball = { x: lerp(out.pos[A.ball].x, HOOP_APP.x, e), y: lerp(out.pos[A.ball].y, HOOP_APP.y, e) };
           out.scale = 1 - 0.3 * Math.sin(Math.PI * e);
+          out.held = false;
         } else if (A.ball === "shot") {
           out.ball = B.ball === "shot" ? HOOP_APP
             : { x: lerp(HOOP_APP.x, out.pos[B.ball].x, e), y: lerp(HOOP_APP.y, out.pos[B.ball].y, e) };
+          out.held = false;
         } else if (A.ball !== B.ball) {
           out.ball = { x: lerp(out.pos[A.ball].x, out.pos[B.ball].x, e), y: lerp(out.pos[A.ball].y, out.pos[B.ball].y, e) };
         } else {
@@ -662,7 +770,7 @@ const SYSTEM = {"app":"basketballcoach-web","version":1,"title":"Nouveau syst\u0
     });
     S.screens.forEach((sc) => { if (sc.a > 0) drawScreenT(sc.s, sc.d, sc.a); });
     const bv = V(S.ball);
-    court.ball(bv.x, bv.y, S.scale);
+    court.ball(bv.x, bv.y, S.scale, S.held);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
