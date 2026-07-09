@@ -458,9 +458,10 @@ function defaultPositions() {
 }
 
 /* ---------- Situations initiales ---------- */
-// Coordonnées définies pour la variante "gauche" en vue demi-terrain
-// (y petit = gauche à l'écran). "Droit" = miroir. En terrain complet,
-// la vue est retournée : gauche et droite s'inversent, d'où le XOR.
+// Les deux vues étant cohérentes (rotation pure), gauche/droite du panier
+// sont identiques partout : y grand = gauche du panier, y petit = droite.
+// Les coordonnées de base ci-dessous décrivent la variante "droite" (y petit);
+// la variante "gauche" est le miroir y -> 15 - y.
 
 const SITUATION_LABELS = {
   defaut: "Attaque placée", cote_gauche: "Côté gauche", cote_droit: "Côté droit",
@@ -487,24 +488,26 @@ function situationPositions(baseKey) {
       });
       break;
     case "lf_attaque":    // notre lancer franc : a1 tire
+      // Raquette : tireur + 2 attaquants (2e spots) + 3 défenseurs (1er spots x2, 3e spot x1)
       Object.assign(A, {
         a1: { x: 5.8, y: 7.5 },
         a4: spot(2, -1), a5: spot(2, 1),
-        a2: { x: 7.6, y: 3.6 }, a3: { x: 9.0, y: 9.2 },
+        a2: { x: 8.4, y: 4.0 }, a3: { x: 8.9, y: 10.6 },
       });
       Object.assign(D, {
-        d4: spot(1, -1), d5: spot(1, 1), d3: spot(3, -1), d2: spot(3, 1),
-        d1: { x: 7.0, y: 7.5 },
+        d4: spot(1, -1), d5: spot(1, 1), d2: spot(3, -1),
+        d1: { x: 7.8, y: 7.5 }, d3: { x: 8.8, y: 10.0 },
       });
       break;
     case "lf_defense":    // lancer franc adverse : d1 tire, le ballon part au cercle
+      // Raquette : tireur + 2 attaquants adverses (2e spots) + 3 défenseurs à nous (1er spots x2, 3e spot x1)
       Object.assign(A, {
-        a4: spot(1, -1), a5: spot(1, 1), a3: spot(3, -1), a2: spot(3, 1),
-        a1: { x: 8.2, y: 7.5 },
+        a4: spot(1, -1), a5: spot(1, 1), a3: spot(3, -1),
+        a2: { x: 8.0, y: 4.5 }, a1: { x: 9.5, y: 7.5 },
       });
       Object.assign(D, {
         d1: { x: 5.8, y: 7.5 }, d2: spot(2, -1), d3: spot(2, 1),
-        d4: { x: 7.4, y: 5.6 }, d5: { x: 7.4, y: 9.4 },
+        d4: { x: 8.8, y: 5.5 }, d5: { x: 8.8, y: 9.5 },
       });
       ball = "shot";
       break;
@@ -522,8 +525,8 @@ function applySituation(key) {
   } else {
     const baseKey = key.replace("_droit", "_gauche");
     const { A, D, ball } = situationPositions(baseKey);
-    // miroir si variante "droit" XOR vue terrain complet (gauche/droite inversés)
-    const flip = key.endsWith("_droit") !== (state.courtMode === "full");
+    // base = variante "droite"; miroir pour la variante "gauche" (identique dans les deux vues)
+    const flip = !key.endsWith("_droit");
     const put = (id, p) => {
       ph.pos[id] = clampToCourt(flip ? { x: p.x, y: 15 - p.y } : { x: p.x, y: p.y });
     };
@@ -659,15 +662,17 @@ function computeView() {
 }
 
 // terrain (m) -> écran (px)
+// La vue demi-terrain est une ROTATION pure de la vue complète (pas de miroir) :
+// ce qui est à gauche du panier reste à gauche du panier dans les deux vues.
 function c2s(x, y) {
   const { s, ox, oy } = view;
-  if (state.courtMode === "half") return [ox + y * s, oy + x * s];
+  if (state.courtMode === "half") return [ox + (COURT.H - y) * s, oy + x * s];
   return [ox + x * s, oy + y * s];
 }
 // écran (px) -> terrain (m)
 function s2c(px, py) {
   const { s, ox, oy } = view;
-  if (state.courtMode === "half") return { x: (py - oy) / s, y: (px - ox) / s };
+  if (state.courtMode === "half") return { x: (py - oy) / s, y: COURT.H - (px - ox) / s };
   return { x: (px - ox) / s, y: (py - oy) / s };
 }
 
@@ -683,7 +688,8 @@ function clampToCourt(p) {
 
 function setCourtTransform() {
   const { s, ox, oy } = view;
-  if (state.courtMode === "half") ctx.setTransform(0, s, s, 0, ox, oy);
+  // demi-terrain : screenX = ox + (15 - y)*s, screenY = oy + x*s (rotation, det > 0)
+  if (state.courtMode === "half") ctx.setTransform(0, s, -s, 0, ox + COURT.H * s, oy);
   else ctx.setTransform(s, 0, 0, s, ox, oy);
 }
 
