@@ -242,6 +242,23 @@
     z-index: 50;
   }
   #toast.show { opacity: 1; }
+
+  #screenPopup {
+    position: absolute;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    z-index: 20;
+    white-space: nowrap;
+  }
+  #screenPopup.show { display: flex; }
+  .scr-tag { color: #93c5fd; font-size: 11px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -254,6 +271,7 @@
   <button class="btn" id="newBtn">Nouveau</button>
   <button class="btn" id="importBtn">Importer</button>
   <button class="btn" id="exportBtn">Exporter JSON</button>
+  <button class="btn" id="imgBtn">🖼 Exporter images</button>
   <button class="btn primary" id="videoBtn">🎥 Exporter vidéo</button>
   <input type="file" id="fileInput" accept=".json,application/json" hidden>
 </header>
@@ -284,6 +302,7 @@
       <div class="hint">
         Glisse les joueurs sur le terrain pour définir leurs positions à chaque phase.
         Glisse le <b style="color:var(--accent)">ballon</b> sur un joueur pour lui donner, ou sur le panier pour un tir.
+        Glisse un joueur <i>sans ballon</i> sur un défenseur pour poser un <b>écran</b> (clique sur le T pour le retirer).
       </div>
     </section>
 
@@ -368,7 +387,12 @@ function makePhase(base, n) {
     duration: 1.5,
     ball: base ? base.ball : "a1",
     pos: base ? JSON.parse(JSON.stringify(base.pos)) : defaultPositions(),
+    screens: [],   // [{ s: 'aX' (poseur), d: 'dY' (défenseur) }]
   };
+}
+
+function normalizePhases() {
+  state.phases.forEach((ph) => { if (!Array.isArray(ph.screens)) ph.screens = []; });
 }
 
 function defaultState() {
@@ -649,6 +673,82 @@ function drawArrow(from, to, color, dashed = false, alpha = 0.85) {
   ctx.restore();
 }
 
+/* ---------- Écrans ---------- */
+
+// Symbole en T : barre perpendiculaire côté défenseur, queue vers le poseur
+function drawScreen(sPos, dPos, alpha = 1) {
+  const dx = dPos.x - sPos.x, dy = dPos.y - sPos.y;
+  const n = Math.hypot(dx, dy) || 1;
+  const ux = dx / n, uy = dy / n;              // direction poseur -> défenseur
+  const bar = {
+    x: dPos.x - ux * (R_PLAYER + 0.3),
+    y: dPos.y - uy * (R_PLAYER + 0.3),
+  };
+  const HALF_BAR = 0.65, TAIL = 0.6;
+  const [x1, y1] = c2s(bar.x + uy * HALF_BAR, bar.y - ux * HALF_BAR);
+  const [x2, y2] = c2s(bar.x - uy * HALF_BAR, bar.y + ux * HALF_BAR);
+  const [x3, y3] = c2s(bar.x, bar.y);
+  const [x4, y4] = c2s(bar.x - ux * TAIL, bar.y - uy * TAIL);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = "#1e293b";
+  ctx.lineCap = "round";
+  ctx.lineWidth = Math.max(3, view.s * 0.13);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);   // barre du T
+  ctx.moveTo(x3, y3); ctx.lineTo(x4, y4);   // queue vers le poseur
+  ctx.stroke();
+  ctx.restore();
+}
+
+// centre de la barre du T (pour le hit-test de suppression)
+function screenBarCenter(phase, sc) {
+  const sPos = phase.pos[sc.s], dPos = phase.pos[sc.d];
+  const dx = dPos.x - sPos.x, dy = dPos.y - sPos.y;
+  const n = Math.hypot(dx, dy) || 1;
+  return { x: dPos.x - dx / n * (R_PLAYER + 0.3), y: dPos.y - dy / n * (R_PLAYER + 0.3) };
+}
+
+function visibleScreens(phase) {
+  return (phase.screens || []).filter((sc) =>
+    DEF_IDS.indexOf(sc.d) < state.defenders);
+}
+
+// retire les écrans devenus incohérents (poseur trop loin du défenseur)
+function cleanupScreens(phase) {
+  if (!phase.screens) return;
+  phase.screens = phase.screens.filter((sc) =>
+    dist(phase.pos[sc.s], phase.pos[sc.d]) < 2.2);
+}
+
+const screenPopup = document.createElement("div");
+screenPopup.id = "screenPopup";
+screenPopup.innerHTML = `<span></span><button class="btn small primary">Écran</button><button class="btn small">Non</button>`;
+document.querySelector("#canvasWrap").appendChild(screenPopup);
+let pendingScreen = null;
+
+function offerScreen(sId, dId, clientX, clientY) {
+  pendingScreen = { s: sId, d: dId };
+  screenPopup.querySelector("span").textContent = "Écran de " + sId[1] + " sur D" + dId[1] + " ?";
+  const wrap = document.querySelector("#canvasWrap").getBoundingClientRect();
+  screenPopup.style.left = clamp(clientX - wrap.left + 12, 8, wrap.width - 190) + "px";
+  screenPopup.style.top = clamp(clientY - wrap.top - 46, 8, wrap.height - 50) + "px";
+  screenPopup.classList.add("show");
+}
+function hideScreenPopup() { screenPopup.classList.remove("show"); pendingScreen = null; }
+
+screenPopup.querySelector(".primary").addEventListener("click", () => {
+  if (!pendingScreen) return;
+  const phase = state.phases[sel];
+  pushUndo();
+  phase.screens = (phase.screens || []).filter((sc) => sc.d !== pendingScreen.d);
+  phase.screens.push(pendingScreen);
+  toast("Écran de " + pendingScreen.s[1] + " sur D" + pendingScreen.d[1] + " (clique sur le T pour le retirer)");
+  hideScreenPopup();
+  renderPhaseList(); save();
+});
+screenPopup.querySelector(".btn:not(.primary)").addEventListener("click", hideScreenPopup);
+
 /* ---------- Position du ballon ---------- */
 
 function nearestHoop(p) {
@@ -689,13 +789,17 @@ function totalDuration() {
 // état interpolé à l'instant t (secondes)
 function sampleAt(t) {
   const ph = state.phases;
-  const out = { pos: {}, ball: null, ballScale: 1, label: ph[0].name, phaseIdx: 0 };
+  const out = { pos: {}, ball: null, ballScale: 1, label: ph[0].name, phaseIdx: 0, screens: [] };
+  const screensOf = (phase, alpha) => visibleScreens(phase).map((sc) => ({
+    sPos: out.pos[sc.s], dPos: out.pos[sc.d], alpha,
+  }));
 
   if (ph.length === 1 || t <= START_HOLD) {
     const A = ph[0];
     ALL_IDS.forEach((id) => (out.pos[id] = { ...A.pos[id] }));
     out.ball = staticBallPos(A);
     out.label = A.name;
+    out.screens = screensOf(A, 1);
     return out;
   }
 
@@ -716,6 +820,7 @@ function sampleAt(t) {
       out.ballScale = out._bs || 1;
       out.label = B.name;
       out.phaseIdx = i;
+      out.screens = screensOf(B, Math.min(1, e * 2));   // fondu à l'approche
       return out;
     }
     acc += dur;
@@ -726,6 +831,7 @@ function sampleAt(t) {
   out.ball = staticBallPos(Z);
   out.label = Z.name;
   out.phaseIdx = ph.length - 1;
+  out.screens = screensOf(Z, 1);
   return out;
 
   function ballDuring(A, B, e, pos) {
@@ -773,6 +879,7 @@ function render() {
   if (playing || scrubbing) {
     const s = sampleAt(playT);
     visibleIds().forEach((id) => drawToken(id, s.pos[id]));
+    (s.screens || []).forEach((sc) => drawScreen(sc.sPos, sc.dPos, sc.alpha));
     if (s.ball) drawBall(s.ball, 1, s.ballScale || 1);
     drawOverlayText(s.label, true);
   } else {
@@ -805,6 +912,8 @@ function render() {
       drawToken(id, phase.pos[id]);
     });
     if (dragging && dragging.id !== "ball") drawToken(dragging.id, phase.pos[dragging.id]);
+
+    visibleScreens(phase).forEach((sc) => drawScreen(phase.pos[sc.s], phase.pos[sc.d]));
 
     if (dragging && dragging.id === "ball" && dragBallPos) drawBall(dragBallPos, 0.9, 1.15);
     else drawBall(staticBallPos(phase));
@@ -902,9 +1011,21 @@ function pointerPos(ev) {
 cv.addEventListener("pointerdown", (ev) => {
   if (playing || recording) return;
   if (scrubbing) { scrubbing = false; return; } // 1er clic : retour à la vue édition
+  hideScreenPopup();
   const { px, py } = pointerPos(ev);
   const c = s2c(px, py);
   const phase = state.phases[sel];
+
+  // clic sur la barre d'un écran -> suppression
+  for (const sc of visibleScreens(phase)) {
+    if (dist(c, screenBarCenter(phase, sc)) < 0.35) {
+      pushUndo();
+      phase.screens = phase.screens.filter((x) => x !== sc);
+      toast("Écran retiré.");
+      renderPhaseList(); save();
+      return;
+    }
+  }
 
   // ballon : saisie directe uniquement si le clic est vraiment dessus
   const bp = staticBallPos(phase);
@@ -942,6 +1063,7 @@ cv.addEventListener("pointermove", (ev) => {
 
 cv.addEventListener("pointerup", (ev) => {
   if (!dragging) return;
+  const wasDragging = dragging.id;
   if (dragging.id === "ball" && dragBallPos) {
     const phase = state.phases[sel];
     // lâché sur un panier ?
@@ -964,6 +1086,21 @@ cv.addEventListener("pointerup", (ev) => {
     dragBallPos = null;
   }
   dragging = null;
+
+  // écran : attaquant sans ballon lâché sur un défenseur ?
+  const phase = state.phases[sel];
+  cleanupScreens(phase);
+  if (wasDragging[0] === "a" && wasDragging !== phase.ball) {
+    const p = phase.pos[wasDragging];
+    let best = null, bd = 1.15;
+    DEF_IDS.slice(0, state.defenders).forEach((d) => {
+      const dd = dist(p, phase.pos[d]);
+      if (dd < bd) { bd = dd; best = d; }
+    });
+    const already = best && (phase.screens || []).some((sc) => sc.s === wasDragging && sc.d === best);
+    if (best && !already) offerScreen(wasDragging, best, ev.clientX, ev.clientY);
+  }
+
   renderPhaseList();
   save();
 });
@@ -978,10 +1115,14 @@ function renderPhaseList() {
     div.className = "phase-item" + (i === sel ? " selected" : "");
 
     const ballTxt = ph.ball === "shot" ? "🏀→🧺 tir" : "🏀 J" + ph.ball[1];
+    const scrTxt = (ph.screens || []).length
+      ? `<span class="scr-tag">T ${ph.screens.map((sc) => sc.s[1] + "▸D" + sc.d[1]).join(" ")}</span>`
+      : "";
     div.innerHTML = `
       <div class="top">
         <span class="num">${i + 1}</span>
         <input class="pname" value="${escapeHtml(ph.name)}" spellcheck="false">
+        ${scrTxt}
         <span class="ball-tag">${ballTxt}</span>
       </div>
       <div class="bottom">
@@ -1149,6 +1290,7 @@ $("#fileInput").addEventListener("change", (e) => {
       }
       pushUndo();
       state = data;
+      normalizePhases();
       sel = 0; playT = 0;
       syncUI(); save();
       toast("Système « " + state.title + " » importé.");
@@ -1172,6 +1314,26 @@ function downloadBlob(blob, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
+
+/* ---------- Export images (une par phase) ---------- */
+
+$("#imgBtn").addEventListener("click", async () => {
+  if (playing || recording) return;
+  const prevSel = sel;
+  setPlaying(false); scrubbing = false;
+  hideScreenPopup();
+  const base = slug(state.title);
+  for (let i = 0; i < state.phases.length; i++) {
+    sel = i;
+    render();   // vue édition : positions + flèches + écrans de la phase i
+    const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
+    downloadBlob(blob, base + "-phase-" + String(i + 1).padStart(2, "0") + ".png");
+    await new Promise((r) => setTimeout(r, 350));
+  }
+  sel = prevSel;
+  renderPhaseListSelectionOnly();
+  toast(state.phases.length + " image(s) exportée(s) — une par phase.");
+});
 
 /* ---------- Export vidéo ---------- */
 
@@ -1227,6 +1389,7 @@ window.addEventListener("keydown", (e) => {
       const data = JSON.parse(saved);
       if (data.app === "basketballcoach-web" && Array.isArray(data.phases) && data.phases.length) {
         state = data;
+        normalizePhases();
       }
     }
   } catch (e) {}
