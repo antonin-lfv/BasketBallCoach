@@ -350,8 +350,7 @@
       <div class="row">
         <label class="inline">Situation</label>
         <select id="situationSel" title="Position initiale (phase 1)">
-          <option value="">Position initiale…</option>
-          <option value="defaut">Attaque placée (défaut)</option>
+          <option value="defaut">Attaque placée</option>
           <option value="cote_gauche">Côté gauche</option>
           <option value="cote_droit">Côté droit</option>
           <option value="fond_gauche">Fond gauche</option>
@@ -496,10 +495,11 @@ function situationPositions(baseKey) {
       });
       Object.assign(D, {
         d4: spot(1, -1), d5: spot(1, 1), d2: spot(3, -1),
-        d1: { x: 7.8, y: 7.5 }, d3: { x: 8.8, y: 10.0 },
+        d1: { x: 9.2, y: 7.5 },   // hors de la zone à 3 points
+        d3: { x: 8.8, y: 10.0 },
       });
       break;
-    case "lf_defense":    // lancer franc adverse : d1 tire, le ballon part au cercle
+    case "lf_defense":    // lancer franc adverse : d1 sur la ligne, ballon au joueur 1
       // Raquette : tireur + 2 attaquants adverses (2e spots) + 3 défenseurs à nous (1er spots x2, 3e spot x1)
       Object.assign(A, {
         a4: spot(1, -1), a5: spot(1, 1), a3: spot(3, -1),
@@ -509,7 +509,6 @@ function situationPositions(baseKey) {
         d1: { x: 5.8, y: 7.5 }, d2: spot(2, -1), d3: spot(2, 1),
         d4: { x: 8.8, y: 5.5 }, d5: { x: 8.8, y: 9.5 },
       });
-      ball = "shot";
       break;
   }
   return { A, D, ball };
@@ -577,6 +576,7 @@ function defaultState() {
     title: "Nouveau système",
     courtMode: "half",
     defenders: 0,
+    situation: "defaut",
     phases: [makePhase(null, 1)],
   };
 }
@@ -1557,7 +1557,7 @@ function movePhase(i, dir) {
 function syncUI() {
   $("#titleInput").value = state.title;
   $("#defCount").value = state.defenders;
-  $("#situationSel").value = state.situation || "";
+  $("#situationSel").value = state.situation || "defaut";
   document.querySelectorAll("#courtSeg button").forEach((b) =>
     b.classList.toggle("active", b.dataset.mode === state.courtMode));
   renderPhaseList();
