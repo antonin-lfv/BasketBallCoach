@@ -5,524 +5,526 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BasketballCoach — Créez, animez et partagez vos systèmes de jeu</title>
 <meta name="description" content="Le playbook numérique de votre club. Dessinez vos systèmes de basketball, animez-les en temps réel et exportez-les en vidéo, images ou PDF. Gratuit, sans installation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --night: #000000;
-    --night-soft: #0a0a0a;
-    --white: #ffffff;
-    --white-mute: #f0f0fa;
-    --hairline: #3a3a3f;
-    --ball: #f97316;
-    --display: "D-DIN-Bold", "Arial Narrow", Arial, Verdana, sans-serif;
-    --body: "D-DIN", Arial, Verdana, sans-serif;
+    --cream: #faf4e8;        /* parquet clair, fond principal */
+    --cream-2: #f3e7d0;      /* parquet un peu plus chaud */
+    --floor: #efdcbd;        /* le sol du terrain, comme dans l'app */
+    --brown: #8a5a2b;        /* lignes du terrain */
+    --slate: #0f172a;        /* le sombre de l'app */
+    --slate-2: #1e293b;
+    --slate-3: #334155;
+    --ink: #26170a;          /* texte principal, brun très foncé */
+    --muted: #7a6c58;        /* texte secondaire chaud */
+    --orange: #f97316;       /* le ballon ! couleur primaire */
+    --orange-dark: #ea580c;
+    --orange-soft: #ffedd5;
+    --green: #15803d;        /* attaquants */
+    --red: #dc2626;          /* défenseurs */
+    --radius: 24px;
+    --radius-lg: 32px;
+    --shadow: 0 10px 34px rgba(76, 46, 8, .12);
+    --shadow-lg: 0 24px 60px rgba(76, 46, 8, .16);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    background: var(--night);
-    color: var(--white);
-    font-family: var(--body);
-    font-size: 16px;
-    line-height: 1.5;
-    letter-spacing: 0.32px;
+    font-family: "Nunito", ui-rounded, -apple-system, "Segoe UI", sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.65;
     overflow-x: hidden;
   }
 
-  /* ===== Nav overlay ===== */
+  /* ===== Nav ===== */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
     display: flex;
     align-items: center;
-    gap: 40px;
-    padding: 24px 32px;
+    gap: 34px;
+    padding: 14px 28px;
     z-index: 50;
-    transition: background .3s;
+    background: rgba(250, 244, 232, .85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(138, 90, 43, .12);
   }
-  nav.scrolled { background: rgba(0,0,0,.85); backdrop-filter: blur(6px); }
   .wordmark {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 17px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--white);
+    font-weight: 900;
+    font-size: 20px;
+    color: var(--ink);
     text-decoration: none;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .wordmark span { color: var(--ball); }
-  nav .links { display: flex; gap: 28px; margin-left: auto; }
+  .wordmark .ball { font-size: 22px; }
+  .wordmark span.c { color: var(--orange); }
+  nav .links { display: flex; gap: 26px; margin-left: auto; }
   nav .links a {
-    color: var(--white);
+    color: var(--muted);
     text-decoration: none;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 1.17px;
-    text-transform: uppercase;
-    line-height: 2;
-    opacity: .85;
+    transition: color .2s;
   }
-  nav .links a:hover { opacity: 1; border-bottom: 1px solid var(--white); }
+  nav .links a:hover { color: var(--orange-dark); }
 
-  /* ===== Ghost pill CTA ===== */
-  .pill {
-    display: inline-block;
-    border: 1px solid var(--white);
-    border-radius: 32px;
-    padding: 18px 34px;
-    color: var(--white);
+  /* ===== Boutons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--orange);
+    color: #fff;
     text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1.17px;
-    text-transform: uppercase;
-    line-height: 0.94;
-    transition: background .25s, color .25s;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 14px 28px;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(249, 115, 22, .35);
+    transition: transform .2s, box-shadow .2s, background .2s;
+  }
+  .btn:hover { transform: translateY(-2px); background: var(--orange-dark); box-shadow: 0 12px 26px rgba(249, 115, 22, .42); }
+  .btn.small { padding: 10px 20px; font-size: 15px; box-shadow: 0 6px 14px rgba(249,115,22,.3); }
+  .btn.ghost {
     background: transparent;
-    cursor: pointer;
+    color: var(--ink);
+    border: 2px solid rgba(38, 23, 10, .18);
+    box-shadow: none;
   }
-  .pill:hover { background: var(--white); color: var(--night); }
+  .btn.ghost:hover { border-color: var(--orange); color: var(--orange-dark); background: var(--orange-soft); }
+  .btn.on-dark { box-shadow: 0 10px 26px rgba(249, 115, 22, .45); }
 
-  /* ===== Bands ===== */
-  section {
-    min-height: 100vh;
-    position: relative;
+  /* ===== Sections ===== */
+  section { padding: 110px 28px; position: relative; }
+  .inner { max-width: 1160px; margin: 0 auto; }
+  .eyebrow {
+    display: inline-block;
+    background: var(--orange-soft);
+    color: var(--orange-dark);
+    font-weight: 800;
+    font-size: 14px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-weight: 900;
+    font-size: clamp(38px, 5.6vw, 64px);
+    line-height: 1.08;
+    letter-spacing: -0.5px;
+  }
+  h1 .hl { color: var(--orange); }
+  h2 {
+    font-weight: 900;
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.3px;
+  }
+  .lead { color: var(--muted); font-size: 18px; max-width: 560px; margin: 20px 0 34px; }
+
+  /* ===== Hero ===== */
+  #hero {
+    padding-top: 150px;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(249, 115, 22, .14), transparent 65%),
+      radial-gradient(700px 420px at -10% 30%, rgba(21, 128, 61, .08), transparent 60%),
+      var(--cream);
+  }
+  #hero .inner {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-note { margin-top: 18px; font-size: 14px; color: var(--muted); font-weight: 600; }
+
+  /* fenêtre mockup de l'app */
+  .window {
+    background: var(--slate-2);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transform: rotate(1.2deg);
+  }
+  .window .bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 16px;
+    background: var(--slate);
+  }
+  .window .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .window .bar .title {
+    margin-left: 10px;
+    color: #94a3b8;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .window canvas { display: block; width: 100%; height: auto; }
+
+  /* ===== Cartes fonctionnalités ===== */
+  #features { background: #fffdf8; border-top: 1px solid rgba(138,90,43,.1); border-bottom: 1px solid rgba(138,90,43,.1); }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 26px;
+    margin-top: 48px;
+  }
+  .card {
+    background: var(--cream);
+    border: 1px solid rgba(138, 90, 43, .12);
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+    transition: transform .25s, box-shadow .25s;
+  }
+  .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+  .card .icon {
+    width: 56px; height: 56px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    font-size: 26px;
+    margin-bottom: 18px;
   }
-  .band-inner {
-    position: relative;
-    z-index: 2;
-    max-width: 1200px;
-    padding: 96px 32px;
-    width: 100%;
-  }
-  .eyebrow {
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    line-height: 2;
-    color: var(--white-mute);
-    opacity: .8;
-    margin-bottom: 12px;
-  }
-  h1 {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(40px, 8vw, 84px);
-    line-height: 0.95;
-    letter-spacing: 1.6px;
-    text-transform: uppercase;
-    max-width: 900px;
-  }
-  h2 {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(34px, 5vw, 60px);
-    line-height: 1.1;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    max-width: 820px;
-  }
-  .lead {
-    font-size: 16px;
-    line-height: 1.7;
-    letter-spacing: 0.32px;
-    color: var(--white-mute);
-    max-width: 540px;
-    margin: 24px 0 40px;
-  }
+  .card h3 { font-weight: 900; font-size: 21px; margin-bottom: 8px; }
+  .card p { color: var(--muted); font-size: 16px; }
+  .card svg.mini { width: 100%; height: auto; margin-top: 20px; border-radius: 14px; }
 
-  /* hero */
-  #hero { text-align: left; }
-  #heroCanvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    opacity: .9;
+  /* ===== Bande animation (sombre, comme l'app) ===== */
+  #lecture { background: var(--slate); color: #fff; }
+  #lecture .inner { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: center; }
+  #lecture .lead { color: #b8c2d4; }
+  #lecture .eyebrow { background: rgba(249, 115, 22, .18); color: #fdba74; }
+  .frame {
+    background: var(--slate-2);
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
   }
-  #hero .band-inner { align-self: end; padding-bottom: 12vh; }
-
-  /* alternating layout bands */
-  .split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-    align-items: center;
-  }
-  .split.rev .viz { order: 2; }
-  .viz svg { width: 100%; height: auto; display: block; }
-  section.soft { background: var(--night-soft); }
-  section.hairline-top { border-top: 1px solid #1c1c20; }
-
-  /* exports band */
-  .export-list { margin-top: 48px; }
-  .export-row {
+  .frame canvas { display: block; width: 100%; height: auto; border-radius: 14px; }
+  .frame .controls {
     display: flex;
-    align-items: baseline;
-    gap: 28px;
-    padding: 26px 0;
-    border-bottom: 1px solid #1c1c20;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 6px 2px;
   }
-  .export-row:first-child { border-top: 1px solid #1c1c20; }
-  .export-word {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(26px, 3.6vw, 44px);
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    min-width: 320px;
+  .frame .play {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 15px;
   }
-  @media (max-width: 700px) {
-    .export-row { flex-direction: column; gap: 8px; }
-    .export-word { min-width: 0; }
+  .frame .track { flex: 1; height: 6px; border-radius: 999px; background: var(--slate-3); position: relative; }
+  .frame .track i {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 42%;
+    border-radius: 999px;
+    background: var(--orange);
+    animation: prog 6.2s linear infinite;
   }
-  .export-desc { color: var(--white-mute); opacity: .85; max-width: 520px; }
+  @keyframes prog { from { width: 3%; } to { width: 97%; } }
 
-  /* stats strip */
+  /* ===== Exports ===== */
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    margin-top: 46px;
+  }
+  .chip {
+    background: #fffdf8;
+    border: 1px solid rgba(138, 90, 43, .12);
+    border-radius: var(--radius);
+    padding: 26px 24px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .chip .em { font-size: 30px; display: block; margin-bottom: 10px; }
+  .chip b { display: block; font-size: 18px; font-weight: 900; margin-bottom: 6px; }
+  .chip span { color: var(--muted); font-size: 14.5px; line-height: 1.5; display: block; }
+
+  /* ===== Stats ===== */
+  #stats { background: var(--cream-2); }
   .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
+    gap: 30px;
     text-align: center;
   }
-  .stat b {
-    display: block;
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(44px, 6vw, 80px);
-    line-height: 0.95;
-    letter-spacing: 1.6px;
+  .stat b { display: block; font-size: clamp(40px, 5vw, 62px); font-weight: 900; color: var(--orange-dark); line-height: 1; }
+  .stat small { display: block; margin-top: 10px; font-weight: 700; color: var(--muted); font-size: 15px; }
+
+  /* ===== CTA final ===== */
+  #cta-final { padding-bottom: 130px; }
+  .mega {
+    background: var(--slate);
+    border-radius: var(--radius-lg);
+    padding: 72px 40px;
+    text-align: center;
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
   }
-  .stat small {
-    display: block;
-    margin-top: 14px;
-    font-size: 12px;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--white-mute);
-    opacity: .75;
+  .mega::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(600px 300px at 50% -20%, rgba(249, 115, 22, .25), transparent 70%);
   }
-  #cta-final { text-align: center; min-height: 88vh; }
-  #cta-final .band-inner { display: flex; flex-direction: column; align-items: center; }
-  #cta-final .lead { text-align: center; margin-left: auto; margin-right: auto; }
+  .mega > * { position: relative; }
+  .mega .lead { margin: 16px auto 34px; color: #b8c2d4; }
 
   footer {
-    border-top: 1px solid #1c1c20;
-    padding: 32px 24px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px 40px;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    color: var(--white-mute);
+    padding: 30px 28px 44px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14.5px;
+    font-weight: 600;
   }
-  footer a { color: var(--white); text-decoration: underline; }
-  footer .micro {
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: .6;
-  }
+  footer a { color: var(--orange-dark); font-weight: 800; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
 
-  /* reveal on scroll */
-  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s ease; }
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
   .reveal.in { opacity: 1; transform: none; }
 
-  @media (max-width: 900px) {
-    .split { grid-template-columns: 1fr; gap: 40px; }
-    .split.rev .viz { order: 0; }
+  @media (max-width: 950px) {
+    #hero .inner, #lecture .inner { grid-template-columns: 1fr; gap: 40px; }
+    .window { transform: none; }
+    .cards { grid-template-columns: 1fr; }
+    .chips { grid-template-columns: repeat(2, 1fr); }
+    .stats { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
     nav .links { display: none; }
-    .stats { grid-template-columns: repeat(2, 1fr); gap: 48px 24px; }
+    section { padding: 80px 20px; }
   }
 </style>
 </head>
 <body>
 
-<nav id="nav">
-  <a class="wordmark" href="#hero">Basketball<span>Coach</span></a>
+<nav>
+  <a class="wordmark" href="#hero"><span class="ball">🏀</span>Basketball<span class="c">Coach</span></a>
   <div class="links">
-    <a href="#phases">Créer</a>
-    <a href="#notation">Notation</a>
+    <a href="#features">Fonctionnalités</a>
     <a href="#lecture">Animation</a>
     <a href="#exports">Exports</a>
   </div>
-  <a class="pill" href="app.html">Lancer l'app</a>
+  <a class="btn small" href="app.html">Lancer l'app</a>
 </nav>
 
 <!-- ===== HERO ===== -->
 <section id="hero">
-  <canvas id="heroCanvas"></canvas>
-  <div class="band-inner">
-    <div class="eyebrow">Le playbook numérique de votre club</div>
-    <h1>Vos systèmes<br>prennent vie</h1>
-    <p class="lead">Dessinez vos systèmes de jeu, animez-les en temps réel et partagez-les à toute l'équipe. Dans le navigateur, sans installation, gratuitement.</p>
-    <a class="pill" href="app.html">Lancer l'application</a>
-  </div>
-</section>
-
-<!-- ===== PHASES ===== -->
-<section id="phases" class="soft hairline-top">
-  <div class="band-inner split reveal">
+  <div class="inner">
     <div>
-      <div class="eyebrow">01 — Créer</div>
-      <h2>Dessinez phase par phase</h2>
-      <p class="lead">Glissez vos cinq attaquants et jusqu'à cinq défenseurs sur un terrain FIBA. Chaque phase mémorise les positions et le porteur du ballon : passes et tirs se règlent en déposant simplement le ballon sur un joueur ou sur le cercle. Touches, lancers francs : les situations de départ sont prêtes à l'emploi.</p>
-      <a class="pill" href="app.html">Essayer maintenant</a>
+      <span class="eyebrow">Le playbook numérique de votre club</span>
+      <h1>Vos systèmes de jeu <span class="hl">prennent vie</span></h1>
+      <p class="lead">Dessinez vos systèmes sur un vrai terrain, animez-les en temps réel et partagez-les à toute l'équipe. Dans le navigateur, sans installation, gratuitement.</p>
+      <div class="hero-ctas">
+        <a class="btn" href="app.html">🏀 Lancer l'application</a>
+        <a class="btn ghost" href="#features">Découvrir</a>
+      </div>
+      <p class="hero-note">Aucun compte requis · fonctionne hors ligne · un simple fichier</p>
     </div>
-    <div class="viz">
-      <svg viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" aria-label="Demi-terrain avec joueurs et flèches">
-        <g stroke="#ffffff" stroke-opacity=".3" fill="none" stroke-width="1.5">
-          <rect x="30" y="20" width="400" height="360" />
-          <rect x="150" y="20" width="160" height="150" />
-          <circle cx="230" cy="170" r="46" />
-          <path d="M 30 200 A 200 176 0 0 0 430 200" transform="rotate(180 230 200) translate(0 -180)" opacity="0"/>
-          <path d="M 54 20 L 54 96 A 176 176 0 0 0 406 96 L 406 20" />
-          <line x1="200" y1="50" x2="260" y2="50" stroke-width="3" />
-          <circle cx="230" cy="62" r="8" stroke="#f97316" stroke-opacity=".9" />
-        </g>
-        <!-- flèches -->
-        <g stroke="#ffffff" stroke-opacity=".75" fill="none" stroke-width="2.5">
-          <path d="M 230 330 L 160 240" marker-end="url(#ah)"/>
-          <path d="M 350 290 L 300 120" marker-end="url(#ah)"/>
-          <path d="M 120 300 L 300 300" stroke-dasharray="7 7" marker-end="url(#ah)"/>
-        </g>
-        <defs>
-          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-            <path d="M0,0 L9,4.5 L0,9 Z" fill="#ffffff" fill-opacity=".75"/>
-          </marker>
-        </defs>
-        <!-- joueurs -->
-        <g font-family="Arial Narrow, Arial" font-weight="700" font-size="15" text-anchor="middle">
-          <circle cx="230" cy="330" r="15" fill="#15803d"/><text x="230" y="335" fill="#fff">1</text>
-          <circle cx="120" cy="300" r="15" fill="#15803d"/><text x="120" y="305" fill="#fff">2</text>
-          <circle cx="350" cy="290" r="15" fill="#15803d"/><text x="350" y="295" fill="#fff">3</text>
-          <circle cx="160" cy="120" r="15" fill="#15803d"/><text x="160" y="125" fill="#fff">4</text>
-          <circle cx="305" cy="150" r="15" fill="#dc2626"/><text x="305" y="155" fill="#fff">3</text>
-          <circle cx="190" cy="255" r="15" fill="#dc2626"/><text x="190" y="260" fill="#fff">1</text>
-          <circle cx="248" cy="318" r="8" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
-        </g>
-      </svg>
+    <div class="window">
+      <div class="bar">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+        <span class="title">BasketballCoach — Corne</span>
+      </div>
+      <canvas id="heroCanvas" width="640" height="520"></canvas>
     </div>
   </div>
 </section>
 
-<!-- ===== NOTATION ===== -->
-<section id="notation" class="hairline-top">
-  <div class="band-inner split rev reveal">
-    <div>
-      <div class="eyebrow">02 — Notation d'entraîneur</div>
-      <h2>Écrans, courbes, la vraie notation</h2>
-      <p class="lead">Posez un écran en déposant un joueur sur un défenseur : le symbole en T s'oriente tout seul. Courbez n'importe quelle trajectoire en tirant sur la flèche, ajoutez autant de points de passage que nécessaire. Vos schémas parlent le langage du terrain.</p>
-      <a class="pill" href="app.html">Dessiner un système</a>
-    </div>
-    <div class="viz">
-      <svg viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" aria-label="Écran en T et trajectoire courbe">
-        <g stroke="#ffffff" stroke-opacity=".3" fill="none" stroke-width="1.5">
-          <rect x="30" y="20" width="400" height="360"/>
-          <rect x="150" y="20" width="160" height="150"/>
-          <circle cx="230" cy="170" r="46"/>
-          <line x1="200" y1="50" x2="260" y2="50" stroke-width="3"/>
-          <circle cx="230" cy="62" r="8" stroke="#f97316" stroke-opacity=".9"/>
-        </g>
-        <!-- trajectoire courbe -->
-        <path d="M 340 330 C 390 220 330 150 262 110" fill="none" stroke="#ffffff" stroke-opacity=".8" stroke-width="2.5" marker-end="url(#ah2)"/>
-        <circle cx="352" cy="212" r="5.5" fill="#fff"/>
-        <!-- écran en T -->
-        <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
-          <line x1="163" y1="196" x2="207" y2="196"/>
-          <line x1="185" y1="196" x2="185" y2="218"/>
-        </g>
-        <defs>
-          <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-            <path d="M0,0 L9,4.5 L0,9 Z" fill="#ffffff" fill-opacity=".8"/>
-          </marker>
-        </defs>
-        <g font-family="Arial Narrow, Arial" font-weight="700" font-size="15" text-anchor="middle">
-          <circle cx="185" cy="240" r="15" fill="#15803d"/><text x="185" y="245" fill="#fff">5</text>
-          <circle cx="185" cy="176" r="15" fill="#dc2626"/><text x="185" y="181" fill="#fff">2</text>
-          <circle cx="340" cy="330" r="15" fill="#15803d"/><text x="340" y="335" fill="#fff">2</text>
-          <circle cx="358" cy="318" r="8" fill="#f97316" stroke="#7c2d12" stroke-width="2"/>
-        </g>
-      </svg>
+<!-- ===== FONCTIONNALITÉS ===== -->
+<section id="features">
+  <div class="inner reveal">
+    <span class="eyebrow">Pensé pour les entraîneurs</span>
+    <h2>Tout se fait en glissant-déposant</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="icon" style="background:var(--orange-soft)">✋</div>
+        <h3>Dessinez phase par phase</h3>
+        <p>Cinq attaquants, jusqu'à cinq défenseurs, un terrain FIBA. Déposez le ballon sur un joueur pour une passe, sur le cercle pour un tir. Touches et lancers francs prêts à l'emploi.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#dcfce7">📐</div>
+        <h3>La vraie notation de coach</h3>
+        <p>Posez un écran en déposant un joueur sur un défenseur : le T s'oriente tout seul. Courbez les trajectoires en tirant sur les flèches, point par point.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#fee2e2">🎬</div>
+        <h3>Animez en un clic</h3>
+        <p>Les joueurs se déplacent, le ballon dribble, vole sur les passes et monte au cercle. Vitesse réglable, timeline précise à la frame.</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#e0e7ff">📤</div>
+        <h3>Partagez au vestiaire</h3>
+        <p>Vidéo pour le groupe WhatsApp, images et planche PDF pour le papier, fichier JSON pour échanger entre coachs. Tout part de l'app, en un clic.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===== LECTURE ===== -->
-<section id="lecture" class="soft hairline-top">
-  <div class="band-inner split reveal">
+<!-- ===== ANIMATION ===== -->
+<section id="lecture">
+  <div class="inner reveal">
     <div>
-      <div class="eyebrow">03 — Animation</div>
+      <span class="eyebrow">Animation temps réel</span>
       <h2>Regardez le système se jouer</h2>
-      <p class="lead">Un clic et vos joueurs se déplacent, le ballon dribble, vole sur les passes et monte au cercle sur les tirs. Vitesse réglable, timeline précise à la frame. Ce que vous dessinez au tableau, vos joueurs le voient en mouvement.</p>
-      <a class="pill" href="app.html">Voir en mouvement</a>
+      <p class="lead">Ce que vous dessinez au tableau, vos joueurs le voient en mouvement. Passe et va, pick and roll, sortie d'écran : l'animation rend le système évident, même pour les plus jeunes.</p>
+      <a class="btn on-dark" href="app.html">Voir en mouvement</a>
     </div>
-    <div class="viz"><canvas id="playCanvas" width="460" height="400" style="width:100%;height:auto;border:1px solid #1c1c20;border-radius:8px"></canvas></div>
+    <div class="frame">
+      <canvas id="playCanvas" width="640" height="470"></canvas>
+      <div class="controls">
+        <span class="play">▶</span>
+        <span class="track"><i></i></span>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ===== EXPORTS ===== -->
-<section id="exports" class="hairline-top">
-  <div class="band-inner reveal">
-    <div class="eyebrow">04 — Partager</div>
-    <h2>Du terrain au vestiaire</h2>
-    <div class="export-list">
-      <div class="export-row"><span class="export-word">Vidéo</span><span class="export-desc">L'animation complète en MP4/WebM, prête pour le groupe WhatsApp de l'équipe.</span></div>
-      <div class="export-row"><span class="export-word">Images</span><span class="export-desc">Un PNG par phase avec flèches et écrans, pour le tableau blanc ou le cahier.</span></div>
-      <div class="export-row"><span class="export-word">Planche PDF</span><span class="export-desc">Toutes les phases en grille imprimable, le playbook papier en un clic.</span></div>
-      <div class="export-row"><span class="export-word">JSON</span><span class="export-desc">Le système complet dans un fichier, à partager entre coachs et réimporter à l'identique.</span></div>
+<section id="exports">
+  <div class="inner reveal" style="text-align:center">
+    <span class="eyebrow">Du terrain au vestiaire</span>
+    <h2>Vos systèmes voyagent partout</h2>
+    <div class="chips">
+      <div class="chip"><span class="em">🎥</span><b>Vidéo</b><span>L'animation complète en MP4/WebM, prête pour le groupe de l'équipe.</span></div>
+      <div class="chip"><span class="em">🖼️</span><b>Images</b><span>Un PNG par phase avec flèches et écrans, pour le tableau blanc.</span></div>
+      <div class="chip"><span class="em">🖨️</span><b>Planche PDF</b><span>Toutes les phases en grille imprimable. Le playbook papier en un clic.</span></div>
+      <div class="chip"><span class="em">💾</span><b>JSON</b><span>Le système complet dans un fichier, à réimporter à l'identique.</span></div>
     </div>
   </div>
 </section>
 
 <!-- ===== STATS ===== -->
-<section class="soft hairline-top" style="min-height:70vh">
-  <div class="band-inner reveal">
+<section id="stats">
+  <div class="inner reveal">
     <div class="stats">
-      <div class="stat"><b>0</b><small>Installation</small></div>
-      <div class="stat"><b>1</b><small>Fichier, hors ligne</small></div>
-      <div class="stat"><b>10</b><small>Joueurs animés</small></div>
-      <div class="stat"><b>∞</b><small>Systèmes</small></div>
+      <div class="stat"><b>0</b><small>installation, zéro compte</small></div>
+      <div class="stat"><b>1</b><small>fichier, fonctionne hors ligne</small></div>
+      <div class="stat"><b>10</b><small>joueurs animés sur le terrain</small></div>
+      <div class="stat"><b>∞</b><small>systèmes à imaginer</small></div>
     </div>
   </div>
 </section>
 
 <!-- ===== CTA FINAL ===== -->
-<section id="cta-final" class="hairline-top">
-  <div class="band-inner reveal">
-    <div class="eyebrow">Prêt pour le prochain entraînement ?</div>
-    <h2 style="max-width:100%">Le prochain système<br>commence ici</h2>
-    <p class="lead">Ouvrez l'application, placez vos joueurs, appuyez sur lecture.</p>
-    <a class="pill" href="app.html">Lancer l'application</a>
+<section id="cta-final">
+  <div class="inner reveal">
+    <div class="mega">
+      <span class="eyebrow" style="background:rgba(249,115,22,.18);color:#fdba74">Prêt pour le prochain entraînement ?</span>
+      <h2>Le prochain système<br>commence ici</h2>
+      <p class="lead">Ouvrez l'application, placez vos joueurs, appuyez sur lecture.</p>
+      <a class="btn" href="app.html">🏀 Lancer l'application</a>
+    </div>
   </div>
 </section>
 
 <footer>
-  <span class="micro">BasketballCoach</span>
-  <span>Créé pour les entraîneurs, par un entraîneur de salon.</span>
-  <a href="app.html">Application</a>
+  BasketballCoach — créé pour les entraîneurs. <a href="app.html">Ouvrir l'application</a>
 </footer>
 
 <script>
 "use strict";
 
-/* ===== Nav au scroll ===== */
-const nav = document.getElementById("nav");
-addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 40), { passive: true });
-
 /* ===== Reveal au scroll ===== */
 const io = new IntersectionObserver((entries) => {
   entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("in"); });
-}, { threshold: 0.15 });
+}, { threshold: 0.12 });
 document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-/* ===== Hero : système de jeu animé en boucle ===== */
-(function heroAnim() {
-  const cv = document.getElementById("heroCanvas");
+/* ===== Couleurs de l'app ===== */
+const C = {
+  floor: "#efdcbd", key: "#e4bd8c", line: "#8a5a2b",
+  green: "#15803d", red: "#dc2626", ball: "#f97316", ballEdge: "#7c2d12",
+};
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = (t) => t * t * (3 - 2 * t);
+
+/* dessine un demi-terrain (panier en haut) dans un canvas, coords [0..15]x[0..14] */
+function makeCourt(cv) {
   const ctx = cv.getContext("2d");
-  const dpr = Math.min(2, devicePixelRatio || 1);
-
-  function resize() {
-    cv.width = cv.clientWidth * dpr;
-    cv.height = cv.clientHeight * dpr;
+  const s = Math.min(cv.width / 16.4, cv.height / 15.4);
+  const ox = (cv.width - 15 * s) / 2, oy = (cv.height - 14 * s) / 2;
+  const P = (x, y) => [ox + x * s, oy + y * s];
+  function draw() {
+    ctx.fillStyle = C.floor;
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.strokeStyle = C.line;
+    ctx.lineWidth = Math.max(1.2, s * 0.05);
+    // raquette peinte
+    ctx.fillStyle = C.key;
+    ctx.fillRect(...P(5.05, 0), 4.9 * s, 5.8 * s);
+    ctx.strokeRect(...P(0, 0), 15 * s, 14 * s);
+    ctx.strokeRect(...P(5.05, 0), 4.9 * s, 5.8 * s);
+    ctx.beginPath(); ctx.arc(...P(7.5, 5.8), 1.8 * s, 0, Math.PI * 2); ctx.stroke();
+    // 3 points
+    ctx.beginPath(); ctx.arc(...P(7.5, 1.575), 6.75 * s, 0.21, Math.PI - 0.21); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(...P(0.9, 0)); ctx.lineTo(...P(0.9, 2.99)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(...P(14.1, 0)); ctx.lineTo(...P(14.1, 2.99)); ctx.stroke();
+    // planche + arceau
+    ctx.beginPath(); ctx.moveTo(...P(6.6, 1.2)); ctx.lineTo(...P(8.4, 1.2)); ctx.lineWidth = s * 0.1; ctx.stroke();
+    ctx.lineWidth = Math.max(1.2, s * 0.05);
+    ctx.beginPath(); ctx.arc(...P(7.5, 1.575), 0.225 * s, 0, Math.PI * 2);
+    ctx.strokeStyle = "#c2410c"; ctx.stroke();
+    ctx.strokeStyle = C.line;
   }
-  addEventListener("resize", resize);
-  resize();
-
-  // demi-terrain en unités [0..15] x [0..14], panier en haut
-  const HOOP = { x: 7.5, y: 1.575 };
-  // phases d'un pick and roll classique (positions {x(0-15), y(0-14)})
-  const K = [
-    { p: [{x:7.5,y:9.2},{x:12.6,y:7.2},{x:2.4,y:7.2},{x:10.3,y:2.4},{x:5.6,y:4.9}], ball: 0 },
-    { p: [{x:8.3,y:8.6},{x:13.2,y:8.6},{x:2.2,y:8.4},{x:10.3,y:2.4},{x:8.6,y:7.4}], ball: 0 },
-    { p: [{x:6.2,y:5.4},{x:13.2,y:8.6},{x:2.2,y:8.4},{x:10.3,y:2.4},{x:9.6,y:3.6}], ball: 0 },
-    { p: [{x:6.2,y:5.4},{x:13.2,y:8.6},{x:2.2,y:8.4},{x:10.3,y:2.4},{x:9.6,y:3.6}], ball: 4 },
-    { p: [{x:6.6,y:6.4},{x:13.4,y:9.2},{x:2.0,y:9.0},{x:11.2,y:3.2},{x:8.2,y:2.2}], ball: "shot" },
-    { p: [{x:7.5,y:9.2},{x:12.6,y:7.2},{x:2.4,y:7.2},{x:10.3,y:2.4},{x:5.6,y:4.9}], ball: 0 },
-  ];
-  const DUR = 1.8, HOLD = 0.55;
-  const ease = (t) => t * t * (3 - 2 * t);
-  const lerp = (a, b, t) => a + (b - a) * t;
-
-  function courtTransform() {
-    // demi-terrain décalé à droite sur écran large pour laisser respirer le titre
-    const s = Math.min(cv.width / 22, cv.height / 17);
-    const cx = cv.width > 1000 * dpr ? cv.width * 0.62 : cv.width / 2;
-    const ox = cx - 7.5 * s;
-    const oy = cv.height * 0.08;
-    return { s, ox, oy };
+  function token(x, y, color, n) {
+    const [px, py] = P(x, y);
+    const r = 0.45 * s;
+    ctx.beginPath(); ctx.ellipse(px, py + r * 0.45, r * 0.95, r * 0.4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,0,0,.15)"; ctx.fill();
+    ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+    ctx.lineWidth = Math.max(1.5, r * 0.14); ctx.strokeStyle = "#fff"; ctx.stroke();
+    ctx.fillStyle = "#fff";
+    ctx.font = `900 ${r * 1.05}px Nunito, Arial`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(n, px, py + r * 0.06);
   }
-  const P = (t, x, y) => [t.ox + x * t.s, t.oy + y * t.s];
-
-  function drawCourt(t) {
-    ctx.strokeStyle = "rgba(255,255,255,.16)";
-    ctx.lineWidth = Math.max(1, t.s * 0.045);
-    const r = (x, y, w, h) => { const [a, b] = P(t, x, y); ctx.strokeRect(a, b, w * t.s, h * t.s); };
-    r(0, 0, 15, 14);
-    r(5.05, 0, 4.9, 5.8);
-    ctx.beginPath();
-    const [fx, fy] = P(t, 7.5, 5.8);
-    ctx.arc(fx, fy, 1.8 * t.s, 0, Math.PI * 2);
-    ctx.stroke();
-    // arc 3 points
-    ctx.beginPath();
-    const [hx, hy] = P(t, HOOP.x, HOOP.y);
-    ctx.arc(hx, hy, 6.75 * t.s, 0.21, Math.PI - 0.21);
-    ctx.stroke();
-    // panier
-    ctx.beginPath();
-    ctx.arc(hx, hy, 0.225 * t.s, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(249,115,22,.8)";
-    ctx.stroke();
-    const [bx1, by1] = P(t, 6.6, 1.2), [bx2, by2] = P(t, 8.4, 1.2);
-    ctx.beginPath(); ctx.moveTo(bx1, by1); ctx.lineTo(bx2, by2);
-    ctx.strokeStyle = "rgba(255,255,255,.3)";
-    ctx.stroke();
+  function ball(x, y, scale = 1) {
+    const [px, py] = P(x + 0.48, y - 0.32);
+    const r = 0.26 * s * scale;
+    ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = C.ball; ctx.fill();
+    ctx.lineWidth = Math.max(1, r * 0.18); ctx.strokeStyle = C.ballEdge; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px - r, py); ctx.lineTo(px + r, py);
+    ctx.moveTo(px, py - r); ctx.lineTo(px, py + r);
+    ctx.lineWidth = Math.max(0.7, r * 0.1); ctx.stroke();
   }
+  return { ctx, draw, token, ball };
+}
 
+/* boucle d'animation générique sur des keyframes {p:[{x,y}...], ball} */
+function runLoop(cv, K, colors, DUR, HOOP) {
+  const court = makeCourt(cv);
   let t0 = performance.now();
   function frame(now) {
-    const total = (K.length - 1) * DUR + HOLD;
-    let tt = (((now - t0) / 1000) % total + total) % total;
-    let seg = Math.min(K.length - 2, Math.floor(tt / DUR));
-    let local = Math.min(1, tt / DUR - seg);
+    const total = (K.length - 1) * DUR + 0.6;
+    const tt = (((now - t0) / 1000) % total + total) % total;
+    const seg = Math.min(K.length - 2, Math.floor(tt / DUR));
+    const local = Math.min(1, tt / DUR - seg);
     const e = ease(local);
     const A = K[seg], B = K[seg + 1];
-
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    const tr = courtTransform();
-    drawCourt(tr);
-
-    const pos = A.p.map((pa, i) => ({
-      x: lerp(pa.x, B.p[i].x, e),
-      y: lerp(pa.y, B.p[i].y, e),
-    }));
-
-    // joueurs
-    pos.forEach((p, i) => {
-      const [x, y] = P(tr, p.x, p.y);
-      const r = 0.42 * tr.s;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,255,255,.92)";
-      ctx.fill();
-      ctx.fillStyle = "#000";
-      ctx.font = `700 ${r * 1.1}px "Arial Narrow", Arial`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(i + 1, x, y + r * 0.06);
-    });
-
-    // ballon
-    let bp;
-    let scale = 1;
+    court.draw();
+    const pos = A.p.map((pa, i) => ({ x: lerp(pa.x, B.p[i].x, e), y: lerp(pa.y, B.p[i].y, e) }));
+    pos.forEach((p, i) => court.token(p.x, p.y, colors[i].c, colors[i].n));
+    let bp, scale = 1;
     if (A.ball === B.ball && typeof A.ball === "number") {
       bp = pos[A.ball];
       const d = Math.hypot(A.p[A.ball].x - B.p[A.ball].x, A.p[A.ball].y - B.p[A.ball].y);
@@ -535,74 +537,43 @@ document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     } else {
       bp = { x: lerp(HOOP.x, pos[B.ball].x, e), y: lerp(HOOP.y, pos[B.ball].y, e) };
     }
-    const [bx, by] = P(tr, bp.x + 0.45, bp.y - 0.3);
-    ctx.beginPath();
-    ctx.arc(bx, by, 0.24 * tr.s * scale, 0, Math.PI * 2);
-    ctx.fillStyle = "#f97316";
-    ctx.fill();
-
+    court.ball(bp.x, bp.y, scale);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-})();
+}
 
-/* ===== Bande lecture : mini animation ===== */
-(function playAnim() {
-  const cv = document.getElementById("playCanvas");
-  const ctx = cv.getContext("2d");
-  const W = cv.width, H = cv.height;
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const ease = (t) => t * t * (3 - 2 * t);
-  // passe et va simple
-  const K = [
-    { a: { x: 230, y: 330 }, b: { x: 370, y: 260 }, ball: "a" },
-    { a: { x: 230, y: 330 }, b: { x: 370, y: 260 }, ball: "b" },
-    { a: { x: 250, y: 120 }, b: { x: 370, y: 260 }, ball: "b" },
-    { a: { x: 250, y: 120 }, b: { x: 370, y: 260 }, ball: "a" },
-    { a: { x: 230, y: 330 }, b: { x: 370, y: 260 }, ball: "a" },
-  ];
-  const DUR = 1.4;
-  let t0 = performance.now();
-  function frame(now) {
-    const total = (K.length - 1) * DUR + 0.5;
-    let tt = (((now - t0) / 1000) % total + total) % total;
-    let seg = Math.min(K.length - 2, Math.floor(tt / DUR));
-    const e = ease(Math.min(1, tt / DUR - seg));
-    const A = K[seg], B = K[seg + 1];
-    ctx.clearRect(0, 0, W, H);
-    // terrain
-    ctx.strokeStyle = "rgba(255,255,255,.3)";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(30, 20, 400, 360);
-    ctx.strokeRect(150, 20, 160, 150);
-    ctx.beginPath(); ctx.arc(230, 170, 46, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(200, 50); ctx.lineTo(260, 50); ctx.lineWidth = 3; ctx.stroke();
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(230, 62, 8, 0, Math.PI * 2); ctx.strokeStyle = "rgba(249,115,22,.9)"; ctx.stroke();
+const HOOP = { x: 7.5, y: 1.575 };
 
-    const pa = { x: lerp(A.a.x, B.a.x, e), y: lerp(A.a.y, B.a.y, e) };
-    const pb = { x: lerp(A.b.x, B.b.x, e), y: lerp(A.b.y, B.b.y, e) };
-    const drawP = (p, n) => {
-      ctx.beginPath(); ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
-      ctx.fillStyle = "#15803d"; ctx.fill();
-      ctx.strokeStyle = "#fff"; ctx.stroke();
-      ctx.fillStyle = "#fff"; ctx.font = "700 15px 'Arial Narrow', Arial";
-      ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(n, p.x, p.y + 1);
-    };
-    drawP(pa, "1"); drawP(pb, "2");
-    let bp;
-    if (A.ball === B.ball) bp = A.ball === "a" ? pa : pb;
-    else {
-      const from = A.ball === "a" ? pa : pb, to = B.ball === "a" ? pa : pb;
-      bp = { x: lerp(from.x, to.x, e), y: lerp(from.y, to.y, e) };
-    }
-    ctx.beginPath(); ctx.arc(bp.x + 17, bp.y - 12, 8, 0, Math.PI * 2);
-    ctx.fillStyle = "#f97316"; ctx.fill();
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
+/* Hero : pick and roll à 5 (3 attaquants + 2 défenseurs) */
+runLoop(
+  document.getElementById("heroCanvas"),
+  [
+    { p: [{x:7.5,y:9.4},{x:12.6,y:7.0},{x:2.4,y:7.0},{x:5.6,y:4.9},{x:8.4,y:10.2}], ball: 0 },
+    { p: [{x:8.4,y:8.6},{x:13.2,y:8.4},{x:2.2,y:8.2},{x:8.7,y:7.6},{x:9.2,y:9.4}], ball: 0 },
+    { p: [{x:6.0,y:5.2},{x:13.2,y:8.4},{x:2.2,y:8.2},{x:9.6,y:3.8},{x:7.0,y:6.2}], ball: 0 },
+    { p: [{x:6.0,y:5.2},{x:13.2,y:8.4},{x:2.2,y:8.2},{x:9.6,y:3.8},{x:7.2,y:4.6}], ball: 3 },
+    { p: [{x:6.4,y:6.2},{x:13.4,y:9.0},{x:2.0,y:8.8},{x:8.4,y:2.4},{x:8.6,y:3.4}], ball: "shot" },
+    { p: [{x:7.5,y:9.4},{x:12.6,y:7.0},{x:2.4,y:7.0},{x:5.6,y:4.9},{x:8.4,y:10.2}], ball: 0 },
+  ],
+  [{c:C.green,n:1},{c:C.green,n:2},{c:C.green,n:3},{c:C.green,n:5},{c:C.red,n:1}],
+  1.8, HOOP
+);
+
+/* Bande animation : passe et va */
+runLoop(
+  document.getElementById("playCanvas"),
+  [
+    { p: [{x:7.5,y:9.6},{x:12.4,y:6.8},{x:8.2,y:8.6}], ball: 0 },
+    { p: [{x:7.5,y:9.6},{x:12.4,y:6.8},{x:8.2,y:8.6}], ball: 1 },
+    { p: [{x:8.6,y:3.4},{x:12.4,y:6.8},{x:9.4,y:5.4}], ball: 1 },
+    { p: [{x:8.6,y:3.4},{x:12.4,y:6.8},{x:9.4,y:5.4}], ball: 0 },
+    { p: [{x:8.6,y:3.4},{x:12.4,y:6.8},{x:9.4,y:5.4}], ball: "shot" },
+    { p: [{x:7.5,y:9.6},{x:12.4,y:6.8},{x:8.2,y:8.6}], ball: 0 },
+  ],
+  [{c:C.green,n:1},{c:C.green,n:2},{c:C.red,n:1}],
+  1.5, HOOP
+);
 </script>
 </body>
 </html>
