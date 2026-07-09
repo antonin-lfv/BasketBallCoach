@@ -1,42 +1,33 @@
-# BasketballCoach — Animation Creator
+# BasketballCoach 🏀
 
-Une application Streamlit pour créer des **séquences d’animation** de systèmes de jeu de basketball, avec génération vidéo via Manim.
+Éditeur de systèmes de jeu de basketball, 100% côté client. Un seul fichier, aucune dépendance, aucun build.
 
+> L'ancien prototype Streamlit + Manim est conservé dans la branche [`V1`](../../tree/V1).
 
+## Lancer
 
-## 📋 Présentation
+Ouvrir `index.html` dans un navigateur (double-clic suffit). Pour le partager : héberger le fichier n'importe où (GitHub Pages, Netlify, un simple serveur) ou l'envoyer tel quel.
 
-Cette appli permet de :
-- **Placer** des attaquants et des défenseurs sur un terrain de basketball.
-- **Définir** une suite d’actions (déplacements, tirs, passes) pour les différents attaquants. 
-- Créer différents **scénarios** de jeu dnas une même animation en ajoutant des points de sauvegarde et en les organisant dans un ordre spécifique.
-- **Générer** une vidéo animée du système de jeu avec Manim.
-- **Exporter/importer** la configuration pour la réutilisation ultérieure.
-- **Obtenir** une description en langage naturel de la séquence.
+## Fonctionnement
 
-<br>
+Le principe est celui des **phases** (keyframes) : chaque phase mémorise la position de tous les joueurs et le porteur du ballon. L'animation interpole entre les phases, en temps réel, sans aucune génération.
 
-## 👁️ Aperçu
+- **Déplacer un joueur** : glisser-déposer sur le terrain (édite la phase sélectionnée).
+- **Passe** : glisser le ballon sur un autre attaquant.
+- **Tir** : glisser le ballon sur le panier.
+- **Écran** : glisser un joueur sans ballon sur un défenseur, puis confirmer. L'écran est noté par un symbole en T orienté selon la position du poseur. Cliquer sur le T pour le retirer.
+- **Fantômes et flèches** : la vue d'édition montre la phase précédente en transparence, avec flèches de déplacement (pleines) et de passe/tir (pointillées).
+- **Lecture** : bouton ▶ ou Espace, vitesse réglable, timeline scrubbable.
+- **Terrain** : demi-terrain ou terrain complet (FIBA 28×15 m).
+- **Défenseurs** : 0 à 5, avec placement automatique entre l'attaquant et le panier.
+- **Export JSON** : sauvegarde/rechargement d'un système.
+- **Export vidéo** : enregistre la lecture en WebM/MP4 via MediaRecorder.
+- **Export images** : un PNG par phase, avec flèches et écrans, pour impression ou partage.
+- **Annuler** : Ctrl+Z / Cmd+Z. Sauvegarde automatique dans le navigateur (localStorage).
 
-<p align="center">
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 30 00" src="https://github.com/user-attachments/assets/39368cfe-815d-4ce7-9774-4a8b45949136" />
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 30 06" src="https://github.com/user-attachments/assets/f32a05f3-579d-432f-a25e-80ec626793e9" />
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 30 14" src="https://github.com/user-attachments/assets/04c69eb8-c582-443f-bb5b-aceb9ba9297c" />
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 30 29" src="https://github.com/user-attachments/assets/14afb276-7daa-41f3-a244-f571216aa6b2" />
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 35 29" src="https://github.com/user-attachments/assets/1e53bc67-737a-487b-a1da-868fdf63ce2c" />
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 35 52" src="https://github.com/user-attachments/assets/de97184d-2274-4d28-81af-fb2bab6265f7" />
-  <img width="1624" alt="Capture d’écran 2025-04-18 à 18 35 59" src="https://github.com/user-attachments/assets/bdc6f2bf-4d2d-4fa4-aa75-1d214c92d1cd" />
-</p>
+## Détails techniques
 
-
-
-## 🚀 Lancer l'application
-
-```bash
-uv run streamlit run main.py
-```
-
-Pour installer `uv`, voir la doc [ICI](https://docs.astral.sh/uv/).
-
-Si problème avec Latex lors de la génération de l'animation, se référer à la documentation pour l'installer [ICI](https://docs.manim.community/en/stable/installation/uv.html#step-2-optional-installing-latex).
-
+- Coordonnées stockées en mètres sur le terrain complet FIBA (paniers à x = 1.575 et 26.425, axe y centré à 7.5). La vue demi-terrain est une rotation portrait du côté gauche.
+- Rendu Canvas 2D avec transformation uniforme mètres → pixels, compatible haute densité (devicePixelRatio).
+- Interpolation smoothstep entre phases; le ballon suit le porteur, décrit un arc lors des passes et des tirs.
+- Format JSON versionné (`app: "basketballcoach-web", version: 1`).
