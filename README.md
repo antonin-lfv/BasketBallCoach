@@ -1,40 +1,84 @@
 # BasketballCoach 🏀
 
-Éditeur de systèmes de jeu de basketball, 100% côté client. Un seul fichier, aucune dépendance, aucun build.
+Le playbook numérique de votre club : dessinez vos systèmes de jeu, animez-les en temps réel, enregistrez-les sur votre compte et partagez-les à l'équipe.
 
-> L'ancien prototype Streamlit + Manim est conservé dans la branche [`V1`](../../tree/V1).
+> L'ancien prototype Streamlit + Manim est conservé dans la branche [`V1`](../../tree/V1). La version mono-fichier précédente reste disponible dans `app.html`.
 
-## Lancer
+## Architecture
 
-- `index.html` : la landing page de présentation.
-- `app.html` : l'application elle-même (double-clic suffit).
+```
+├── index.html          Landing page statique (racine du site)
+├── frontend/           Application React + TypeScript + Vite (servie sous /app/)
+│   └── src/
+│       ├── engine/     Moteur pur (types, géométrie, sampler, situations) — zéro dépendance
+│       ├── render/     Rendu canvas (projection, dessin, scène)
+│       ├── components/ UI (sidebar, phases, playbar, terrain, modales, bibliothèque)
+│       └── pages/      Éditeur + visionneuse de partage (/app/s/<token>)
+├── backend/            API FastAPI + SQLAlchemy async + PostgreSQL (JSONB)
+└── deploy/             Docker Compose : PostgreSQL + API + Caddy (HTTPS auto)
+```
 
-Pour le partager : héberger les deux fichiers n'importe où (GitHub Pages, Netlify, un simple serveur) ou les envoyer tels quels.
+## Fonctionnalités
 
-## Fonctionnement
+- **Éditeur** : drag and drop des joueurs et du ballon (passe, tir), écrans en T, trajectoires courbes (Catmull-Rom), dribble animé, demi-terrain ou terrain complet FIBA, situations initiales (touches, lancers francs), undo, exports vidéo / images / planche PDF / JSON.
+- **Mode invité** : tout fonctionne sans compte, le travail est sauvegardé dans le navigateur (localStorage). L'enregistrement sur le compte et le partage nécessitent une connexion.
+- **Comptes** : email + mot de passe (scrypt), sessions par cookie httpOnly. Systèmes stockés en JSONB, rangés dans des dossiers.
+- **Partage** : lien public en lecture seule (`/app/s/<token>`), révocable, lecture immédiate sans compte.
 
-Le principe est celui des **phases** (keyframes) : chaque phase mémorise la position de tous les joueurs et le porteur du ballon. L'animation interpole entre les phases, en temps réel, sans aucune génération.
+## Développement
 
-- **Déplacer un joueur** : glisser-déposer sur le terrain (édite la phase sélectionnée).
-- **Passe** : glisser le ballon sur un autre attaquant.
-- **Tir** : glisser le ballon sur le panier.
-- **Écran** : glisser un joueur sans ballon sur un défenseur, puis confirmer. L'écran est noté par un symbole en T orienté selon la position du poseur. Cliquer sur le T pour le retirer.
-- **Trajectoires courbes** : tirer sur le petit point au milieu d'une flèche pour la courber (spline Catmull-Rom). Chaque segment expose une nouvelle poignée pour affiner. Double-clic sur un point pour le retirer.
-- **Dribble** : pendant la lecture, le ballon rebondit (variation de taille) quand son porteur se déplace.
-- **Fantômes et flèches** : la vue d'édition montre la phase précédente en transparence, avec flèches de déplacement (pleines) et de passe/tir (pointillées).
-- **Lecture** : bouton ▶ ou Espace, vitesse réglable, timeline scrubbable.
-- **Terrain** : demi-terrain ou terrain complet (FIBA 28×15 m).
-- **Défenseurs** : 0 à 5, avec placement automatique entre l'attaquant et le panier.
-- **Situations initiales** : sélecteur de mises en place pour la phase 1 (côté gauche/droit, fond gauche/droit, lancer franc attaque/défense). Les deux vues sont cohérentes : ce qui est à gauche du panier reste à gauche du panier (la vue complète est une rotation de la vue demi-terrain).
-- **Export JSON** : sauvegarde/rechargement d'un système.
-- **Export vidéo** : enregistre la lecture en WebM/MP4 via MediaRecorder.
-- **Export images** : un PNG par phase, avec flèches et écrans, pour impression ou partage.
-- **Planche imprimable / PDF** : toutes les phases en grille dans une page prête à imprimer (Cmd/Ctrl+P → enregistrer en PDF).
-- **Annuler** : Ctrl+Z / Cmd+Z. Sauvegarde automatique dans le navigateur (localStorage).
+Backend (SQLite en local, aucun PostgreSQL requis) :
 
-## Détails techniques
+```bash
+cd backend
+pip install -r requirements.txt
+DATABASE_URL="sqlite+aiosqlite:///./dev.db" COOKIE_SECURE=0 uvicorn app.main:app --reload
+```
 
-- Coordonnées stockées en mètres sur le terrain complet FIBA (paniers à x = 1.575 et 26.425, axe y centré à 7.5). La vue demi-terrain est une rotation portrait du côté gauche.
-- Rendu Canvas 2D avec transformation uniforme mètres → pixels, compatible haute densité (devicePixelRatio).
-- Interpolation smoothstep entre phases; le ballon suit le porteur, décrit un arc lors des passes et des tirs.
-- Format JSON versionné (`app: "basketballcoach-web", version: 1`).
+Frontend (proxy /api vers le port 8000) :
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5173/app/
+```
+
+Mode mono-processus (l'API sert aussi la landing et le build React) :
+
+```bash
+cd frontend && npm run build
+cd ../backend && SERVE_STATIC=1 DATABASE_URL="sqlite+aiosqlite:///./dev.db" COOKIE_SECURE=0 uvicorn app.main:app
+# http://localhost:8000/  (landing)  ·  http://localhost:8000/app/  (application)
+```
+
+## Déploiement sur un VPS
+
+Prérequis : Docker + Docker Compose, un domaine pointant vers le serveur (optionnel mais recommandé pour le HTTPS automatique).
+
+```bash
+git clone <repo> && cd BasketBallCoach/deploy
+cp .env.example .env        # définir POSTGRES_PASSWORD et SITE_ADDRESS=mondomaine.fr
+docker compose up -d --build
+```
+
+Caddy sert la landing à la racine, l'app React sous `/app/`, proxifie `/api/` vers FastAPI, et obtient automatiquement les certificats Let's Encrypt si `SITE_ADDRESS` est un domaine.
+
+Sauvegarde de la base :
+
+```bash
+docker compose exec db pg_dump -U bball bball > backup_$(date +%F).sql
+```
+
+## API
+
+`POST /api/auth/register` · `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me`
+`GET|POST /api/folders` · `PATCH|DELETE /api/folders/{id}`
+`GET|POST /api/systems` · `GET|PUT|DELETE /api/systems/{id}`
+`POST|DELETE /api/systems/{id}/share` · `GET /api/shared/{token}` (public)
+
+## Notes techniques
+
+- Coordonnées en mètres sur le terrain FIBA 28×15 (paniers à x = 1.575 / 26.425). La vue demi-terrain est une rotation pure de la vue complète : la gauche du panier reste à gauche.
+- Le moteur (`frontend/src/engine`) est un module TypeScript pur, sans dépendance : réutilisable pour la visionneuse, les exports serveur ou de futurs usages (télestration).
+- Format JSON versionné (`app: "basketballcoach-web", version: 1`), compatible avec les exports de la version mono-fichier.
+- Pas encore de migrations (create_all au démarrage) ni de rate limiting : à ajouter avant une ouverture large au public.

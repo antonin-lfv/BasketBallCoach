@@ -1,4 +1,8 @@
-/__pycache__/
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.env
 /tests/
 /systems
 /media
