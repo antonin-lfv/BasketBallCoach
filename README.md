@@ -4,9 +4,15 @@ BasketballCoach est un outil web ultra simple pour dessiner, animer et exporter 
 
 Le projet tient volontairement en deux fichiers HTML : une landing page et un éditeur. Pas de backend, pas de compte, pas de base de données, pas de build.
 
-![Landing page](docs/screenshots/landing.png)
+<p align="center">
+  <img src="images/landing.png" alt="Landing page" width="800">
+</p>
 
-![Éditeur BasketballCoach](docs/screenshots/editor.png)
+<br>
+
+<p align="center">
+  <img src="images/app.png" alt="Éditeur BasketballCoach" width="800">
+</p>
 
 ## Fonctionnalités
 
@@ -36,43 +42,6 @@ Puis ouvrir :
 http://localhost:8080
 ```
 
-## Structure
-
-```text
-.
-├── index.html   # landing page
-├── app.html     # éditeur complet
-├── .nojekyll    # compatibilité GitHub Pages
-└── README.md
-```
-
-## Déploiement GitHub Pages
-
-1. Pousser le dépôt sur GitHub.
-2. Aller dans `Settings` -> `Pages`.
-3. Choisir `Deploy from a branch`.
-4. Sélectionner la branche de publication.
-5. Choisir le dossier `/root`.
-6. Ouvrir l'URL GitHub Pages générée.
-
-Les liens sont relatifs, donc le site fonctionne aussi dans un sous-chemin :
-
-```text
-https://utilisateur.github.io/nom-du-repo/
-```
-
 ## Données
 
 BasketballCoach ne stocke rien sur un serveur. Le système courant est sauvegardé dans `localStorage`, puis peut être conservé ou partagé via export JSON.
-
-## Roadmap Possible
-
-- Templates de systèmes prêts à l'emploi.
-- Meilleure gestion mobile/tablette.
-- Mode présentation plein écran.
-- Bibliothèque locale de systèmes.
-- Icônes et assets visuels personnalisés.
-
-## Licence
-
-Projet personnel. Licence à préciser.
