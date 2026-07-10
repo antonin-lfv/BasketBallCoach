@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BasketballCoach — Créateur de systèmes</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="78" font-size="78">🏀</text></svg>'>
 <style>
   :root {
     --bg: #0f172a;
@@ -133,6 +134,49 @@
 
   /* ===== Phase list ===== */
   #phasesSection { flex: 1; display: flex; flex-direction: column; min-height: 120px; }
+  .phase-title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .phase-title .spacer { flex: 1; }
+  .help-wrap { display: inline-flex; align-items: center; }
+  .help-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: help;
+  }
+  .help-btn:hover,
+  .help-btn:focus { color: #fff; border-color: var(--accent); background: var(--accent); outline: none; }
+  .phase-help {
+    position: fixed;
+    top: var(--phase-help-top, 120px);
+    left: var(--phase-help-left, 340px);
+    z-index: 200;
+    display: none;
+    width: 285px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--muted);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .28);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.5;
+    text-transform: none;
+  }
+  .help-wrap:hover .phase-help,
+  .help-wrap:focus-within .phase-help { display: block; }
   #phaseList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
   .phase-item {
     background: var(--bg);
@@ -400,14 +444,21 @@
     </section>
 
     <section id="phasesSection">
-      <h2>Phases <span style="float:right"><button class="btn small primary" id="addPhaseBtn">+ Phase</button></span></h2>
+      <h2 class="phase-title">
+        <span>Phases</span>
+        <span class="help-wrap">
+          <button class="help-btn" type="button" aria-label="Afficher l'aide des phases">?</button>
+          <span class="phase-help" role="tooltip">
+            Glisse les joueurs sur le terrain pour définir leurs positions à chaque phase.
+            Glisse le <b style="color:var(--accent)">ballon</b> sur un joueur pour lui donner, ou sur le panier pour un tir.
+            Glisse un joueur <i>sans ballon</i> sur un défenseur pour poser un <b>écran</b> (clique sur le T pour le retirer).
+            Tire sur le petit point au milieu d'une flèche pour <b>courber</b> la trajectoire (double-clic sur un point pour le retirer).
+          </span>
+        </span>
+        <span class="spacer"></span>
+        <button class="btn small primary" id="addPhaseBtn">+ Phase</button>
+      </h2>
       <div id="phaseList"></div>
-      <div class="hint">
-        Glisse les joueurs sur le terrain pour définir leurs positions à chaque phase.
-        Glisse le <b style="color:var(--accent)">ballon</b> sur un joueur pour lui donner, ou sur le panier pour un tir.
-        Glisse un joueur <i>sans ballon</i> sur un défenseur pour poser un <b>écran</b> (clique sur le T pour le retirer).
-        Tire sur le petit point au milieu d'une flèche pour <b>courber</b> la trajectoire (double-clic sur un point pour le retirer).
-      </div>
     </section>
 
     <section>
@@ -1655,6 +1706,24 @@ $("#autoDefBtn").addEventListener("click", () => {
 
 $("#addPhaseBtn").addEventListener("click", addPhase);
 
+function positionPhaseHelp() {
+  const btn = $(".help-btn");
+  const help = $(".phase-help");
+  if (!btn || !help) return;
+  const r = btn.getBoundingClientRect();
+  const width = 285;
+  const left = Math.max(12, Math.min(window.innerWidth - width - 12, r.left - 18));
+  const top = Math.max(12, Math.min(window.innerHeight - 170, r.bottom + 8));
+  help.style.setProperty("--phase-help-left", left + "px");
+  help.style.setProperty("--phase-help-top", top + "px");
+}
+
+$(".help-btn").addEventListener("mouseenter", positionPhaseHelp);
+$(".help-btn").addEventListener("focus", positionPhaseHelp);
+$(".help-btn").addEventListener("click", positionPhaseHelp);
+window.addEventListener("resize", positionPhaseHelp);
+$("aside").addEventListener("scroll", positionPhaseHelp);
+
 $("#playBtn").addEventListener("click", () => setPlaying(!playing));
 $("#stopBtn").addEventListener("click", () => { setPlaying(false); playT = 0; scrubbing = false; updateScrubUI(); });
 $("#speedSel").addEventListener("change", (e) => { speed = parseFloat(e.target.value); });
@@ -1804,27 +1873,36 @@ $("#boardBtn").addEventListener("click", () => {
   const w = window.open("", "_blank");
   if (!w) { toast("Autorise les fenêtres popup pour générer la planche."); return; }
   const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const cols = state.courtMode === "half" ? 2 : 1;
+  const perPage = cols * 2;
+  const pages = [];
+  for (let i = 0; i < cells.length; i += perPage) pages.push(cells.slice(i, i + perPage));
   w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
 <title>${esc(state.title)} — planche</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #111; }
   h1 { font-size: 20px; margin: 0 0 4px; }
   .sub { color: #666; font-size: 12px; margin-bottom: 16px; }
-  .grid { display: grid; grid-template-columns: ${state.courtMode === "half" ? "1fr 1fr" : "1fr"}; gap: 14px; }
-  figure { margin: 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
+  .page { break-after: page; page-break-after: always; }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+  .grid { display: grid; grid-template-columns: repeat(${cols}, 1fr); grid-template-rows: repeat(2, auto); gap: 14px; }
+  figure { margin: 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
   img { width: 100%; display: block; }
   figcaption { padding: 6px 10px; font-size: 12px; color: #444; border-top: 1px solid #eee; }
   figcaption b { font-size: 13px; color: #111; }
   .hintbar { position: fixed; top: 8px; right: 8px; font-size: 12px; background: #eef2ff; border: 1px solid #c7d2fe; padding: 6px 10px; border-radius: 6px; }
   @page { margin: 12mm; }
-  @media print { .hintbar { display: none; } body { margin: 0; } }
+  @media print { .hintbar { display: none; } body { margin: 0; } .page { margin: 0; } }
 </style></head><body>
 <div class="hintbar">Imprimer ou enregistrer en PDF : Cmd/Ctrl + P</div>
 <h1>${esc(state.title)}</h1>
 <div class="sub">${cells.length} phase(s) — BasketballCoach</div>
-<div class="grid">
-${cells.map((c, i) => `<figure><img src="${c.url}"><figcaption><b>${i + 1}. ${esc(c.name)}</b> — ${c.ball}</figcaption></figure>`).join("\n")}
-</div>
+${pages.map((page, pageIndex) => `<section class="page"><div class="grid">
+${page.map((c, i) => {
+  const n = pageIndex * perPage + i + 1;
+  return `<figure><img src="${c.url}"><figcaption><b>${n}. ${esc(c.name)}</b> — ${c.ball}</figcaption></figure>`;
+}).join("\n")}
+</div></section>`).join("\n")}
 <scr` + `ipt>window.onload = () => setTimeout(() => window.print(), 400);</scr` + `ipt>
 </body></html>`);
   w.document.close();
