@@ -1,9 +1,9 @@
 import CanvasCourt from "../components/CanvasCourt";
-import Header from "../components/Header";
-import LibraryModal from "../components/LibraryModal";
-import { AuthModal, NewDocModal, ShareModal, Toasts } from "../components/Modals";
+import { NewDocModal, ShareModal, Toasts } from "../components/Modals";
+import Navbar from "../components/Navbar";
 import Playbar from "../components/Playbar";
 import Sidebar from "../components/Sidebar";
+import Toolbar from "../components/Toolbar";
 import { useStore } from "../store";
 
 export default function Editor() {
@@ -12,7 +12,8 @@ export default function Editor() {
 
   return (
     <div className={"app-root" + (sidebarHidden ? " no-sidebar" : "")}>
-      <Header />
+      <Navbar />
+      <Toolbar />
       <main>
         <Sidebar />
         <div id="courtArea">
@@ -21,8 +22,6 @@ export default function Editor() {
         </div>
       </main>
       {modal === "new" && <NewDocModal />}
-      {modal === "auth" && <AuthModal />}
-      {modal === "library" && <LibraryModal />}
       {modal === "share" && <ShareModal />}
       <Toasts />
     </div>

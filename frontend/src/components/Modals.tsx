@@ -66,69 +66,6 @@ export function NewDocModal() {
   );
 }
 
-export function AuthModal() {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const store = useStore.getState;
-  const close = () => store().setModal(null);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const user = mode === "login" ? await api.login(email, password) : await api.register(email, password);
-      store().setUser(user);
-      store().toast(mode === "login" ? "Content de te revoir !" : "Compte créé, bienvenue !");
-      close();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Erreur réseau.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <Overlay onClose={close}>
-      <h3>{mode === "login" ? "Connexion" : "Créer un compte"}</h3>
-      <p>
-        Un compte permet d'enregistrer tes systèmes, de les ranger dans des dossiers et de générer des liens de partage
-        pour ton équipe.
-      </p>
-      <form onSubmit={submit} className="auth-form">
-        <input
-          type="email"
-          placeholder="adresse@email.fr"
-          required
-          value={email}
-          autoFocus
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder={mode === "register" ? "Mot de passe (8 caractères min.)" : "Mot de passe"}
-          required
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <div className="form-error">{error}</div>}
-        <div className="modal-btns">
-          <button type="button" className="btn" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}>
-            {mode === "login" ? "Créer un compte" : "J'ai déjà un compte"}
-          </button>
-          <button type="submit" className="btn primary" disabled={busy}>
-            {busy ? "…" : mode === "login" ? "Se connecter" : "S'inscrire"}
-          </button>
-        </div>
-      </form>
-    </Overlay>
-  );
-}
-
 export function ShareModal() {
   const systemId = useStore((s) => s.systemId);
   const dirty = useStore((s) => s.dirty);

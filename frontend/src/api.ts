@@ -57,6 +57,8 @@ export const api = {
   login: (email: string, password: string) => call<User>("POST", "/api/auth/login", { email, password }),
   logout: () => call<{ ok: boolean }>("POST", "/api/auth/logout"),
   me: () => call<User>("GET", "/api/auth/me"),
+  changePassword: (current: string, next: string) =>
+    call<{ ok: boolean }>("POST", "/api/auth/password", { current, new: next }),
 
   folders: () => call<FolderOut[]>("GET", "/api/folders"),
   createFolder: (name: string) => call<FolderOut>("POST", "/api/folders", { name }),

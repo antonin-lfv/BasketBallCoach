@@ -17,6 +17,11 @@ class UserOut(BaseModel):
     email: str
 
 
+class PasswordChange(BaseModel):
+    current: str = Field(min_length=1, max_length=200)
+    new: str = Field(min_length=8, max_length=200)
+
+
 class FolderIn(BaseModel):
     name: str = Field(min_length=1, max_length=120)
 

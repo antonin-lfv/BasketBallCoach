@@ -13,7 +13,24 @@ import type { SystemDoc } from "./engine/types";
 import { rt } from "./runtime";
 
 const LS_KEY = "bballcoach";
+const PREFS_KEY = "bballcoach_prefs";
 const undoStack: string[] = [];
+
+export interface Prefs {
+  courtMode: "half" | "full";
+  defenders: number;
+  speed: number;
+}
+
+function loadPrefs(): Prefs {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    if (raw) return { courtMode: "half", defenders: 0, speed: 1, ...JSON.parse(raw) };
+  } catch {
+    /* ignore */
+  }
+  return { courtMode: "half", defenders: 0, speed: 1 };
+}
 
 export interface Toast {
   id: number;
@@ -31,7 +48,9 @@ interface Store {
   dirty: boolean;
   sidebarHidden: boolean;
   toasts: Toast[];
-  modal: string | null; // 'auth' | 'library' | 'share' | 'new' | null
+  modal: string | null; // 'share' | 'new' | null
+  prefs: Prefs;
+  setPrefs: (p: Partial<Prefs>) => void;
 
   bump: (opts?: { dirty?: boolean }) => void;
   setSel: (i: number) => void;
@@ -88,6 +107,17 @@ export const useStore = create<Store>((set, get) => ({
   sidebarHidden: localStorage.getItem("bballcoach_sidebar") === "hidden",
   toasts: [],
   modal: null,
+  prefs: loadPrefs(),
+
+  setPrefs: (p) => {
+    const prefs = { ...get().prefs, ...p };
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch {
+      /* ignore */
+    }
+    set({ prefs });
+  },
 
   bump: (opts) => {
     const { doc } = get();
@@ -136,6 +166,9 @@ export const useStore = create<Store>((set, get) => ({
     rt.playT = 0;
     rt.scrubbing = false;
     const doc = defaultDoc();
+    const { prefs } = get();
+    doc.courtMode = prefs.courtMode;
+    doc.defenders = prefs.defenders;
     saveLocal(doc);
     set((s) => ({ doc, sel: 0, systemId: null, folderId: null, dirty: false, version: s.version + 1 }));
   },

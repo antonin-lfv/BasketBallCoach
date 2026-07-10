@@ -45,16 +45,18 @@ export default function SharedViewer() {
 
   return (
     <div className="app-root no-sidebar viewer">
-      <header>
+      <nav className="topnav">
         <a href="/" className="brand-link">
           <span className="logo">🏀</span>
-          <span className="brand">BasketballCoach</span>
+          <span className="brand">
+            Basketball<em>Coach</em>
+          </span>
         </a>
         <span className="viewer-title">{title}</span>
         <span className="spacer" />
         <span className="viewer-badge">Lecture seule</span>
         <a className="btn primary" href="/app/">Créer mes systèmes</a>
-      </header>
+      </nav>
       <main>
         <div id="courtArea">
           <CanvasCourt readonly />

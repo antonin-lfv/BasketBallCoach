@@ -13,14 +13,24 @@ COOKIE_NAME = "bball_session"
 SESSION_DAYS = 30
 
 
-def set_session_cookie(response: Response, token: str) -> None:
+def cookie_secure(request: Request) -> bool:
+    """Secure si la requête est en HTTPS (directement ou via le proxy).
+    COOKIE_SECURE=0/1 permet de forcer explicitement."""
+    override = os.environ.get("COOKIE_SECURE")
+    if override is not None:
+        return override != "0"
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+    return proto == "https"
+
+
+def set_session_cookie(response: Response, token: str, request: Request) -> None:
     response.set_cookie(
         COOKIE_NAME,
         token,
         max_age=SESSION_DAYS * 86400,
         httponly=True,
         samesite="lax",
-        secure=os.environ.get("COOKIE_SECURE", "1") != "0",
+        secure=cookie_secure(request),
         path="/",
     )
 
