@@ -7,15 +7,17 @@ Le playbook numérique de votre club : dessinez vos systèmes de jeu, animez-les
 ## Architecture
 
 ```
-├── index.html          Landing page statique (racine du site)
-├── frontend/           Application React + TypeScript + Vite (servie sous /app/)
+├── index.html            Landing page statique (racine du site)
+├── frontend/             Application React + TypeScript + Vite (servie sous /app/)
 │   └── src/
-│       ├── engine/     Moteur pur (types, géométrie, sampler, situations) — zéro dépendance
-│       ├── render/     Rendu canvas (projection, dessin, scène)
-│       ├── components/ UI (sidebar, phases, playbar, terrain, modales, bibliothèque)
-│       └── pages/      Éditeur + visionneuse de partage (/app/s/<token>)
-├── backend/            API FastAPI + SQLAlchemy async + PostgreSQL (JSONB)
-└── deploy/             Docker Compose : PostgreSQL + API + Caddy (HTTPS auto)
+│       ├── engine/       Moteur pur (types, géométrie, sampler, situations) — zéro dépendance
+│       ├── render/       Rendu canvas (projection, dessin, scène)
+│       ├── components/   UI (sidebar, phases, playbar, terrain, modales, bibliothèque)
+│       └── pages/        Éditeur + visionneuse de partage (/app/s/<token>)
+├── backend/              API FastAPI + SQLAlchemy async + PostgreSQL (JSONB) — géré avec uv
+├── caddy/                Reverse proxy : Caddyfile + image (landing + build React + proxy API)
+├── docker-compose.yml    Production : PostgreSQL + API + Caddy (HTTPS auto)
+└── docker-compose.dev.yml  Développement : PostgreSQL seul
 ```
 
 ## Fonctionnalités
@@ -31,13 +33,13 @@ Le playbook numérique de votre club : dessinez vos systèmes de jeu, animez-les
 
 ```bash
 # 1. La base (une seule fois, reste en tâche de fond)
-cd deploy && docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 
-# 2. L'API (rechargement auto)
+# 2. L'API (uv gère Python et les dépendances, rechargement auto)
 cd backend
-pip install -r requirements.txt
+uv sync
 DATABASE_URL="postgresql+asyncpg://bball:bball@localhost:5432/bball" COOKIE_SECURE=0 \
-  uvicorn app.main:app --reload
+  uv run uvicorn app.main:app --reload
 
 # 3. Le front (HMR, proxy /api vers le port 8000)
 cd frontend
@@ -48,7 +50,7 @@ npm run dev        # http://localhost:5173/app/
 **Stack complète en local** (identique à la prod, pour valider avant déploiement) :
 
 ```bash
-cd deploy && cp .env.example .env && docker compose up --build
+cp .env.example .env && docker compose up --build
 # http://localhost/  (landing)  ·  http://localhost/app/  (application)
 ```
 
@@ -58,7 +60,7 @@ Mode mono-processus (l'API sert aussi la landing et le build React, pratique san
 
 ```bash
 cd frontend && npm run build
-cd ../backend && SERVE_STATIC=1 COOKIE_SECURE=0 DATABASE_URL=... uvicorn app.main:app
+cd ../backend && SERVE_STATIC=1 COOKIE_SECURE=0 DATABASE_URL=... uv run uvicorn app.main:app
 # http://localhost:8000/  (landing)  ·  http://localhost:8000/app/  (application)
 ```
 
@@ -67,7 +69,7 @@ cd ../backend && SERVE_STATIC=1 COOKIE_SECURE=0 DATABASE_URL=... uvicorn app.mai
 Prérequis : Docker + Docker Compose, un domaine pointant vers le serveur (optionnel mais recommandé pour le HTTPS automatique).
 
 ```bash
-git clone <repo> && cd BasketBallCoach/deploy
+git clone <repo> && cd BasketBallCoach
 cp .env.example .env        # définir POSTGRES_PASSWORD et SITE_ADDRESS=mondomaine.fr
 docker compose up -d --build
 ```

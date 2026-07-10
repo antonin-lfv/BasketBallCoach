@@ -15,8 +15,7 @@ services:
       retries: 10
 
   api:
-    build:
-      context: ../backend
+    build: ./backend
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+asyncpg://bball:${POSTGRES_PASSWORD}@db:5432/bball
@@ -26,8 +25,8 @@ services:
 
   web:
     build:
-      context: ..
-      dockerfile: deploy/Dockerfile.web
+      context: .
+      dockerfile: caddy/Dockerfile
     restart: unless-stopped
     environment:
       # ex. SITE_ADDRESS=basketballcoach.fr -> HTTPS automatique
