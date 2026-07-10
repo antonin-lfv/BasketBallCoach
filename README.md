@@ -27,27 +27,38 @@ Le playbook numérique de votre club : dessinez vos systèmes de jeu, animez-les
 
 ## Développement
 
-Backend (SQLite en local, aucun PostgreSQL requis) :
+**Workflow recommandé** : le même PostgreSQL que la prod (dans Docker), l'API et le front en direct avec rechargement à chaud.
 
 ```bash
+# 1. La base (une seule fois, reste en tâche de fond)
+cd deploy && docker compose -f docker-compose.dev.yml up -d
+
+# 2. L'API (rechargement auto)
 cd backend
 pip install -r requirements.txt
-DATABASE_URL="sqlite+aiosqlite:///./dev.db" COOKIE_SECURE=0 uvicorn app.main:app --reload
-```
+DATABASE_URL="postgresql+asyncpg://bball:bball@localhost:5432/bball" COOKIE_SECURE=0 \
+  uvicorn app.main:app --reload
 
-Frontend (proxy /api vers le port 8000) :
-
-```bash
+# 3. Le front (HMR, proxy /api vers le port 8000)
 cd frontend
 npm install
 npm run dev        # http://localhost:5173/app/
 ```
 
-Mode mono-processus (l'API sert aussi la landing et le build React) :
+**Stack complète en local** (identique à la prod, pour valider avant déploiement) :
+
+```bash
+cd deploy && cp .env.example .env && docker compose up --build
+# http://localhost/  (landing)  ·  http://localhost/app/  (application)
+```
+
+**Dépannage sans Docker** : l'API accepte n'importe quelle URL SQLAlchemy, donc `DATABASE_URL="sqlite+aiosqlite:///./dev.db"` fonctionne pour un test rapide sans PostgreSQL. À réserver au dépannage : SQLite ne se comporte pas exactement comme PostgreSQL (timezones, concurrence, requêtes JSONB), développer dessus expose à des bugs qui n'apparaîtraient qu'en prod.
+
+Mode mono-processus (l'API sert aussi la landing et le build React, pratique sans Caddy) :
 
 ```bash
 cd frontend && npm run build
-cd ../backend && SERVE_STATIC=1 DATABASE_URL="sqlite+aiosqlite:///./dev.db" COOKIE_SECURE=0 uvicorn app.main:app
+cd ../backend && SERVE_STATIC=1 COOKIE_SECURE=0 DATABASE_URL=... uvicorn app.main:app
 # http://localhost:8000/  (landing)  ·  http://localhost:8000/app/  (application)
 ```
 
