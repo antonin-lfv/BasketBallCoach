@@ -54,6 +54,25 @@ function exportCanvas(doc: SystemDoc): HTMLCanvasElement {
   return cv;
 }
 
+/** Aperçu (dataURL) de la première phase, pour les vignettes de la bibliothèque. */
+export function renderPreview(doc: SystemDoc, phase = 0): string {
+  const half = doc.courtMode === "half";
+  const M = 0.6;
+  const scale = half ? 26 : 18;
+  const cv = document.createElement("canvas");
+  cv.width = Math.round(((half ? COURT.H : COURT.W) + 2 * M) * scale);
+  cv.height = Math.round(((half ? COURT.HALF : COURT.H) + 2 * M) * scale);
+  renderScene(cv, doc, {
+    sel: Math.min(phase, doc.phases.length - 1),
+    playT: 0,
+    playingView: false,
+    exportMode: true,
+    cleanExport: true,
+    margin: M,
+  });
+  return cv.toDataURL("image/png");
+}
+
 function renderPhasePng(doc: SystemDoc, i: number, clean: boolean): Promise<Blob | null> {
   const cv = exportCanvas(doc);
   renderScene(cv, doc, {

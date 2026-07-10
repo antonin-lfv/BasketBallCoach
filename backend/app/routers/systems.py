@@ -43,14 +43,15 @@ def _meta(s: System) -> SystemMeta:
     )
 
 
-@router.get("/systems", response_model=list[SystemMeta])
+@router.get("/systems", response_model=list[SystemOut])
 async def list_systems(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    # data inclus : la bibliothèque rend des aperçus du terrain côté client
     rows = (
         await db.scalars(
             select(System).where(System.user_id == user.id).order_by(System.updated_at.desc())
         )
     ).all()
-    return [_meta(s) for s in rows]
+    return [SystemOut(**_meta(s).model_dump(), data=s.data) for s in rows]
 
 
 @router.post("/systems", response_model=SystemOut)

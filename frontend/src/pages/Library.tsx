@@ -1,17 +1,23 @@
-/** Bibliothèque : page dédiée avec dossiers et systèmes du compte. */
-import { useCallback, useEffect, useState } from "react";
+/** Bibliothèque : dossiers, recherche et cartes avec aperçu du terrain. */
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { api, ApiError, type FolderOut, type SystemMeta } from "../api";
+import { api, ApiError, type FolderOut, type SystemOut } from "../api";
+import {
+  IconBall, IconFolder, IconGrid, IconInbox, IconLink, IconPlus, IconSearch, IconTrash,
+} from "../components/Icons";
 import { Toasts } from "../components/Modals";
 import Navbar from "../components/Navbar";
+import { normalizeDoc } from "../engine/model";
+import { renderPreview } from "../exports";
 import { useStore } from "../store";
 
 export default function Library() {
   const user = useStore((s) => s.user);
   const authChecked = useStore((s) => s.authChecked);
   const [folders, setFolders] = useState<FolderOut[]>([]);
-  const [systems, setSystems] = useState<SystemMeta[]>([]);
+  const [systems, setSystems] = useState<SystemOut[]>([]);
   const [filter, setFilter] = useState<number | "all" | null>("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newFolderName, setNewFolderName] = useState("");
   const [renaming, setRenaming] = useState<number | null>(null);
@@ -21,7 +27,6 @@ export default function Library() {
   const store = useStore.getState;
 
   const reload = useCallback(async () => {
-    setLoading(true);
     try {
       const [f, s] = await Promise.all([api.folders(), api.systems()]);
       setFolders(f);
@@ -37,38 +42,41 @@ export default function Library() {
     if (user) reload();
   }, [user, reload]);
 
+  // aperçus du terrain (première phase), rendus par le moteur
+  const thumbs = useMemo(() => {
+    const map = new Map<number, string>();
+    systems.forEach((s) => {
+      try {
+        map.set(s.id, renderPreview(normalizeDoc(structuredClone(s.data))));
+      } catch {
+        /* aperçu indisponible */
+      }
+    });
+    return map;
+  }, [systems]);
+
   if (authChecked && !user) return <Navigate to="/login?next=/library" replace />;
 
-  const shown = systems.filter((s) =>
-    filter === "all" ? true : filter === null ? s.folder_id === null : s.folder_id === filter,
-  );
+  const q = search.trim().toLowerCase();
+  const shown = systems
+    .filter((s) => (filter === "all" ? true : filter === null ? s.folder_id === null : s.folder_id === filter))
+    .filter((s) => !q || s.title.toLowerCase().includes(q));
   const currentFolder = typeof filter === "number" ? folders.find((f) => f.id === filter) : null;
 
-  const open = async (meta: SystemMeta) => {
-    const full = await api.getSystem(meta.id);
-    store().loadDoc(full.data, full.id, full.folder_id);
-    store().toast("« " + full.title + " » ouvert.");
+  const open = (s: SystemOut) => {
+    store().loadDoc(normalizeDoc(structuredClone(s.data)), s.id, s.folder_id);
+    store().toast("« " + s.title + " » ouvert.");
     navigate("/");
   };
 
-  const createFolder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = newFolderName.trim();
-    if (!name) return;
-    await api.createFolder(name);
-    setNewFolderName("");
-    reload();
-  };
-
-  const copyShare = async (meta: SystemMeta) => {
-    let token = meta.share_token;
+  const copyShare = async (s: SystemOut) => {
+    let token = s.share_token;
     if (!token) {
-      const updated = await api.enableShare(meta.id);
+      const updated = await api.enableShare(s.id);
       token = updated.share_token;
       reload();
     }
-    const url = `${location.origin}/app/s/${token}`;
-    await navigator.clipboard?.writeText(url);
+    await navigator.clipboard?.writeText(`${location.origin}/app/s/${token}`);
     store().toast("Lien de partage copié !");
   };
 
@@ -79,11 +87,14 @@ export default function Library() {
         <aside className="folder-pane">
           <h2>Dossiers</h2>
           <button className={"folder-item" + (filter === "all" ? " active" : "")} onClick={() => setFilter("all")}>
-            Tous les systèmes <span className="count">{systems.length}</span>
+            <span className="fi-label"><IconGrid /> Tous les systèmes</span>
+            <span className="count">{systems.length}</span>
           </button>
           <button className={"folder-item" + (filter === null ? " active" : "")} onClick={() => setFilter(null)}>
-            Sans dossier <span className="count">{systems.filter((s) => s.folder_id === null).length}</span>
+            <span className="fi-label"><IconInbox /> Sans dossier</span>
+            <span className="count">{systems.filter((s) => s.folder_id === null).length}</span>
           </button>
+          <div className="folder-sep" />
           {folders.map((f) =>
             renaming === f.id ? (
               <form
@@ -109,18 +120,22 @@ export default function Library() {
                 }}
                 title="Double-clic pour renommer"
               >
-                📁 {f.name} <span className="count">{f.systems_count}</span>
+                <span className="fi-label"><IconFolder /> {f.name}</span>
+                <span className="count">{f.systems_count}</span>
               </button>
             ),
           )}
-          <form className="folder-new" onSubmit={createFolder}>
-            <input
-              placeholder="Nouveau dossier…"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-            />
-            <button className="btn small" type="submit" disabled={!newFolderName.trim()}>
-              +
+          <form className="folder-new" onSubmit={async (e) => {
+            e.preventDefault();
+            const name = newFolderName.trim();
+            if (!name) return;
+            await api.createFolder(name);
+            setNewFolderName("");
+            reload();
+          }}>
+            <input placeholder="Nouveau dossier…" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} />
+            <button className="btn small" type="submit" disabled={!newFolderName.trim()} title="Créer le dossier">
+              <IconPlus />
             </button>
           </form>
           {currentFolder && (
@@ -133,7 +148,7 @@ export default function Library() {
                 store().toast("Dossier supprimé (systèmes conservés).");
               }}
             >
-              Supprimer « {currentFolder.name} »
+              <IconTrash size={13} /> Supprimer « {currentFolder.name} »
             </button>
           )}
         </aside>
@@ -141,67 +156,107 @@ export default function Library() {
         <main className="library-main">
           <div className="library-head">
             <h1>{filter === "all" ? "Ma bibliothèque" : filter === null ? "Sans dossier" : currentFolder?.name}</h1>
+            <div className="search-box">
+              <IconSearch />
+              <input placeholder="Rechercher un système…" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
             <button className="btn primary" onClick={() => { store().newDoc(); navigate("/"); }}>
-              + Nouveau système
+              <IconPlus /> Nouveau système
             </button>
           </div>
+
           {loading ? (
-            <p className="empty">Chargement…</p>
+            <div className="sys-grid">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="sys-card skeleton" />
+              ))}
+            </div>
           ) : shown.length === 0 ? (
-            <p className="empty">
-              Aucun système ici. Crée un système dans l'éditeur puis clique sur « Enregistrer sur mon compte ».
-            </p>
+            <div className="empty-state">
+              <div className="empty-icon"><IconBall size={44} /></div>
+              {q ? (
+                <>
+                  <h3>Aucun résultat pour « {search} »</h3>
+                  <p>Essaie un autre nom, ou efface la recherche.</p>
+                </>
+              ) : (
+                <>
+                  <h3>Aucun système ici</h3>
+                  <p>Dessine ton premier système dans l'éditeur puis clique sur « Enregistrer sur mon compte ».</p>
+                  <button className="btn primary" onClick={() => { store().newDoc(); navigate("/"); }}>
+                    <IconPlus /> Créer un système
+                  </button>
+                </>
+              )}
+            </div>
           ) : (
             <div className="sys-grid">
               {shown.map((s) => (
                 <div key={s.id} className="sys-card">
-                  <button className="sys-open" onClick={() => open(s)} title="Ouvrir dans l'éditeur">
-                    <b>{s.title}</b>
-                    <small>
-                      Modifié le{" "}
-                      {new Date(s.updated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
-                      {s.share_token ? " · 🔗 partagé" : ""}
-                    </small>
+                  <button className="sys-thumb" onClick={() => open(s)} title="Ouvrir dans l'éditeur">
+                    {thumbs.get(s.id) ? (
+                      <img src={thumbs.get(s.id)} alt="" loading="lazy" />
+                    ) : (
+                      <div className="thumb-fallback"><IconBall size={30} /></div>
+                    )}
+                    <span className="thumb-hover">Ouvrir</span>
                   </button>
-                  <div className="sys-actions">
-                    <select
-                      value={s.folder_id ?? ""}
-                      title="Ranger dans un dossier"
-                      onChange={async (e) => {
-                        const folderId = e.target.value === "" ? null : parseInt(e.target.value);
-                        const full = await api.getSystem(s.id);
-                        await api.updateSystem(s.id, full.title, full.data, folderId);
-                        if (store().systemId === s.id) store().markSaved(s.id, folderId);
-                        reload();
-                      }}
-                    >
-                      <option value="">Sans dossier</option>
-                      {folders.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button className="btn small" onClick={() => copyShare(s)} title="Copier le lien de partage">
-                      🔗
+                  <div className="sys-body">
+                    <button className="sys-title" onClick={() => open(s)}>
+                      {s.title}
                     </button>
-                    {confirmDelete === s.id ? (
-                      <button
-                        className="btn small danger"
-                        onClick={async () => {
-                          await api.deleteSystem(s.id);
-                          if (store().systemId === s.id) store().markSaved(0, null);
-                          setConfirmDelete(null);
+                    <div className="sys-meta">
+                      <span>
+                        {s.data.phases.length} phase{s.data.phases.length > 1 ? "s" : ""} ·{" "}
+                        {new Date(s.updated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                      </span>
+                      {s.share_token && <span className="badge-shared"><IconLink size={11} /> partagé</span>}
+                    </div>
+                    <div className="sys-actions">
+                      <select
+                        value={s.folder_id ?? ""}
+                        title="Ranger dans un dossier"
+                        onChange={async (e) => {
+                          const folderId = e.target.value === "" ? null : parseInt(e.target.value);
+                          await api.updateSystem(s.id, s.title, s.data, folderId);
+                          if (store().systemId === s.id) store().markSaved(s.id, folderId);
                           reload();
                         }}
                       >
-                        Confirmer
+                        <option value="">Sans dossier</option>
+                        {folders.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        className={"btn icon-only" + (s.share_token ? " shared" : "")}
+                        onClick={() => copyShare(s)}
+                        title={s.share_token ? "Copier le lien de partage" : "Générer et copier un lien de partage"}
+                      >
+                        <IconLink />
                       </button>
-                    ) : (
-                      <button className="btn small" title="Supprimer" onClick={() => setConfirmDelete(s.id)}>
-                        🗑
-                      </button>
-                    )}
+                      {confirmDelete === s.id ? (
+                        <button
+                          className="btn small danger"
+                          onBlur={() => setConfirmDelete(null)}
+                          onClick={async () => {
+                            await api.deleteSystem(s.id);
+                            if (store().systemId === s.id) store().markSaved(0, null);
+                            setConfirmDelete(null);
+                            reload();
+                            store().toast("Système supprimé.");
+                          }}
+                        >
+                          Confirmer
+                        </button>
+                      ) : (
+                        <button className="btn icon-only" title="Supprimer" onClick={() => setConfirmDelete(s.id)}>
+                          <IconTrash />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

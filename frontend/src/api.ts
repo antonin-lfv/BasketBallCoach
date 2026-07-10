@@ -65,7 +65,7 @@ export const api = {
   renameFolder: (id: number, name: string) => call<FolderOut>("PATCH", `/api/folders/${id}`, { name }),
   deleteFolder: (id: number) => call<{ ok: boolean }>("DELETE", `/api/folders/${id}`),
 
-  systems: () => call<SystemMeta[]>("GET", "/api/systems"),
+  systems: () => call<SystemOut[]>("GET", "/api/systems"),
   createSystem: (title: string, data: SystemDoc, folder_id: number | null) =>
     call<SystemOut>("POST", "/api/systems", { title, data, folder_id }),
   getSystem: (id: number) => call<SystemOut>("GET", `/api/systems/${id}`),
