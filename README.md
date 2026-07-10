@@ -1,4 +1,8 @@
-# BasketballCoach
+<h1 align="center">
+  <br>
+  BasketballCoach
+  <br>
+</h1>
 
 BasketballCoach est un outil web ultra simple pour dessiner, animer et exporter des systèmes de jeu de basketball.
 
